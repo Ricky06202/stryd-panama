@@ -1,0 +1,215 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { Card, CardContent } from '@/components/ui/card'
+import { ImageWithFallback } from '@/components/figma/ImageWithFallback'
+import { Award, Target, TrendingUp, Zap } from 'lucide-react'
+
+const methodology = [
+  {
+    Icon: Zap,
+    title: 'Potencia como Métrica Principal',
+    description:
+      'A diferencia del ritmo o frecuencia cardíaca, la potencia refleja tu esfuerzo real instantáneamente, sin importar el viento, terreno o temperatura.',
+  },
+  {
+    Icon: Target,
+    title: 'Zonas de Entrenamiento Precisas',
+    description:
+      'Establecemos zonas basadas en tu Critical Power (CP) para optimizar cada sesión de entrenamiento según tus objetivos específicos.',
+  },
+  {
+    Icon: TrendingUp,
+    title: 'Monitoreo de Carga',
+    description:
+      'Utilizamos RSS (Running Stress Score) para balancear el estrés de entrenamiento y evitar sobreentrenamiento o lesiones.',
+  },
+  {
+    Icon: Award,
+    title: 'Periodización Científica',
+    description:
+      'Planes estructurados que desarrollan tu economía de carrera, resistencia y velocidad de forma progresiva y medible.',
+  },
+]
+---
+
+<Layout title="Coach & Método | Stryd Panama">
+  <div class="bg-white">
+    {/* Hero Section */}
+    <section
+      class="relative bg-linear-to-r from-gray-900 to-gray-800 text-white py-20"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+          <h1 class="text-5xl font-bold mb-4">Nuestro Coach & Metodología</h1>
+          <p class="text-xl text-gray-300">
+            Entrenamiento científico para corredores serios
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* Coach Profile */}
+    <section class="py-16 bg-gray-50">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div>
+            <ImageWithFallback
+              client:load
+              src="https://images.unsplash.com/photo-1680024433473-3a526907d7a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxydW5uaW5nJTIwY29hY2glMjB0cmFpbmVyfGVufDF8fHx8MTc2OTk4OTQ5MXww&ixlib=rb-4.1.0&q=80&w=1080"
+              alt="Ricardo Sanjur - Coach StrydPanama"
+              className="w-full h-[500px] object-cover rounded-lg shadow-xl"
+            />
+          </div>
+          <div class="text-black">
+            <h2 class="text-4xl font-bold mb-6">Ricardo Sanjur</h2>
+            <div class="space-y-4 text-gray-700">
+              <p class="text-lg">
+                <span class="font-semibold text-orange-500"
+                  >Coach certificado en entrenamiento de resistencia</span
+                > con más de 10 años de experiencia desarrollando atletas de todos
+                los niveles.
+              </p>
+              <p>
+                Ricardo fue uno de los primeros entrenadores en Centroamérica en
+                adoptar la metodología de entrenamiento basado en potencia con
+                Stryd, revolucionando la forma en que los corredores panameños
+                se preparan para sus carreras.
+              </p>
+              <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+                <h3 class="font-bold text-xl mb-3 text-black">
+                  Logros Destacados:
+                </h3>
+                <ul class="space-y-2">
+                  <li class="flex items-start gap-2">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span>Entrenador de 15+ maratonistas sub-3 horas</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span>Certificación Stryd Power Training</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span>Finisher Ironman 70.3 y múltiples maratones</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span>Fundador de StrydPanama (2022)</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Methodology */}
+    <section class="py-16 bg-white overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold mb-4 text-black">
+            El Método: Potencia &gt; Ritmo
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Por qué entrenar con potencia es superior a usar frecuencia cardíaca
+            o ritmo por kilómetro
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          {
+            methodology.map((item) => (
+              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+                <CardContent className="p-8">
+                  <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mb-4 text-orange-500">
+                    <item.Icon className="h-8 w-8" />
+                  </div>
+                  <h3 class="text-xl font-bold mb-3 text-black">
+                    {item.title}
+                  </h3>
+                  <p class="text-gray-700">{item.description}</p>
+                </CardContent>
+              </Card>
+            ))
+          }
+        </div>
+
+        {/* Comparison Table */}
+        <div
+          class="bg-gray-50 rounded-lg p-8 shadow-lg overflow-x-auto border border-gray-100"
+        >
+          <h3 class="text-2xl font-bold mb-6 text-center text-black">
+            ¿Por Qué Potencia?
+          </h3>
+          <table class="w-full text-black min-w-[600px]">
+            <thead>
+              <tr class="border-b-2 border-gray-300">
+                <th class="text-left p-4">Métrica</th>
+                <th class="text-left p-4">Ventajas</th>
+                <th class="text-left p-4">Desventajas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-gray-200">
+                <td class="p-4 font-semibold text-orange-500"
+                  >Potencia (Stryd)</td
+                >
+                <td class="p-4">
+                  <div class="mb-1">• Reflejo instantáneo del esfuerzo</div>
+                  <div class="mb-1">• No afectado por condiciones externas</div>
+                  <div>• Métrica objetiva y precisa</div>
+                </td>
+                <td class="p-4 text-gray-500">
+                  <div class="mb-1">• Requiere dispositivo Stryd</div>
+                  <div>• Curva de aprendizaje inicial</div>
+                </td>
+              </tr>
+              <tr class="border-b border-gray-200">
+                <td class="p-4 font-semibold">Ritmo (min/km)</td>
+                <td class="p-4">
+                  <div class="mb-1">• Fácil de entender</div>
+                  <div>• No requiere equipo especial</div>
+                </td>
+                <td class="p-4 text-gray-500">
+                  <div class="mb-1">• Varía con terreno y viento</div>
+                  <div class="mb-1">• No refleja esfuerzo real</div>
+                  <div>• Engañoso en subidas/bajadas</div>
+                </td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold">Frecuencia Cardíaca</td>
+                <td class="p-4">
+                  <div class="mb-1">• Indica carga fisiológica</div>
+                  <div>• Útil para recuperación</div>
+                </td>
+                <td class="p-4 text-gray-500">
+                  <div class="mb-1">• Retraso de 30-60 segundos</div>
+                  <div class="mb-1">• Afectada por calor, cafeína, estrés</div>
+                  <div>• Deriva cardíaca en esfuerzos largos</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    {/* Philosophy */}
+    <section
+      class="py-16 bg-linear-to-r from-orange-500 to-orange-600 text-white"
+    >
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold mb-6">Nuestra Filosofía</h2>
+        <p class="text-xl text-orange-100 leading-relaxed font-light italic">
+          "En StrydPanama creemos que cada corredor merece entrenar de forma
+          inteligente, no solo dura. La potencia nos da la claridad para
+          optimizar cada entreno, evitar lesiones y alcanzar objetivos que antes
+          parecían imposibles. No importa si buscas tu primer 5K o clasificar a
+          Boston, los datos objetivos son tu mejor aliado."
+        </p>
+        <p class="text-lg mt-6 font-bold">— Ricardo Sanjur, Head Coach</p>
+      </div>
+    </section>
+  </div>
+</Layout>
