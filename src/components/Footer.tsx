@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-react'
 
 export function Footer() {
   return (
@@ -27,14 +27,17 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-orange-500" />
-                <a href="mailto:info@strydpanama.com" className="hover:text-white">
+                <a
+                  href="mailto:info@strydpanama.com"
+                  className="hover:text-white"
+                >
                   info@strydpanama.com
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-orange-500" />
-                <a href="tel:+5076000000" className="hover:text-white">
-                  +507 6000-0000
+                <a href="tel:+50766714646" className="hover:text-white">
+                  +507 6671-4646
                 </a>
               </div>
             </div>
@@ -45,7 +48,7 @@ export function Footer() {
             <h3 className="text-lg font-bold text-white mb-4">Síguenos</h3>
             <div className="flex gap-4">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/share/1bfxKxzJxo/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-orange-500 transition-colors"
@@ -53,7 +56,7 @@ export function Footer() {
                 <Facebook className="h-6 w-6" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/strydpanama?igsh=aGRwbHVqajc3d2J6"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-orange-500 transition-colors"
@@ -69,5 +72,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }

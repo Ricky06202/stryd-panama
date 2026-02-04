@@ -224,12 +224,14 @@ export function TeamPage() {
             datos precisos y una pasión compartida por el running.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Button
-              size="lg"
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-7 text-lg shadow-xl shadow-orange-500/20"
-            >
-              Solicitar Información
-            </Button>
+            <a href="/unete">
+              <Button
+                size="lg"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-7 text-lg shadow-xl shadow-orange-500/20"
+              >
+                Solicitar Información
+              </Button>
+            </a>
             <Button
               size="lg"
               variant="outline"

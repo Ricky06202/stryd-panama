@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro'
 import { Card, CardContent } from '@/components/ui/card'
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback'
 import { Award, Target, TrendingUp, Zap } from 'lucide-react'
+import coachImg from '../assets/coach.png'
 
 const methodology = [
   {
@@ -55,9 +56,9 @@ const methodology = [
           <div>
             <ImageWithFallback
               client:load
-              src="https://images.unsplash.com/photo-1680024433473-3a526907d7a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxydW5uaW5nJTIwY29hY2glMjB0cmFpbmVyfGVufDF8fHx8MTc2OTk4OTQ5MXww&ixlib=rb-4.1.0&q=80&w=1080"
+              src={coachImg.src}
               alt="Ricardo Sanjur - Coach StrydPanama"
-              className="w-full h-[500px] object-cover rounded-lg shadow-xl"
+              className="w-full h-[500px] object-cover rounded-full shadow-xl"
             />
           </div>
           <div class="text-black">
