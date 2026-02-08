@@ -25,6 +25,8 @@ interface Race {
   maxParticipants?: number
   registrationFee?: string
   highlights: string[]
+  infoUrl?: string
+  registrationUrl?: string
 }
 
 const races: Race[] = [
@@ -43,12 +45,14 @@ const races: Race[] = [
     registrationFee: '$15 - $25',
     highlights: [
       'Medalla finisher para todos los participantes',
-      'Kit de corredor con playera oficial',
+      'Playera oficial (Opcional)',
       'Hidratación en ruta y meta',
-      'Premios en efectivo para categorías',
-      'Fiesta post-carrera con música',
-      'Cronometraje electrónico chip',
+      'Premios',
+      'Fiesta post-carrera',
+      'Cronometraje',
     ],
+    infoUrl: 'https://sansilvestre.ricardosanjur.com/',
+    registrationUrl: 'https://sansilvestre.ricardosanjur.com/inscripcion',
   },
   {
     id: 'san-silvestre-2025',
@@ -207,7 +211,7 @@ export function RacesPage() {
       {/* CTA Section */}
       <section className="py-16 px-4 border-t border-gray-800">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-linear-to-r from-orange-500 to-red-500 rounded-2xl p-12 shadow-xl shadow-orange-500/20">
+          <div className="bg-linear-to-r from-orange-500 to-red-500 rounded-2xl p-8 md:p-12 shadow-xl shadow-orange-500/20">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
               ¿Quieres organizar un evento con nosotros?
             </h2>
@@ -217,10 +221,10 @@ export function RacesPage() {
             </p>
             <Button
               size="lg"
-              className="bg-white text-orange-500 hover:bg-gray-100 font-bold text-lg px-8 py-6"
+              className="bg-white text-orange-500 hover:bg-gray-100 font-bold text-base md:text-lg px-6 py-4 md:px-8 md:py-6 w-full sm:w-auto h-auto whitespace-normal"
               onClick={() =>
                 window.open(
-                  'https://wa.me/50769001234?text=Hola, me interesa organizar un evento con StrydPanama',
+                  'https://wa.me/50766769050?text=Hola, me interesa organizar un evento con StrydPanama',
                   '_blank',
                 )
               }
@@ -329,8 +333,9 @@ function RaceCard({ race }: { race: Race }) {
                 className="bg-orange-500 hover:bg-orange-600 text-white font-bold"
                 onClick={() =>
                   window.open(
-                    'https://wa.me/50769001234?text=Hola, quiero inscribirme en ' +
-                      race.name,
+                    race.registrationUrl ||
+                      'https://wa.me/50769001234?text=Hola, quiero inscribirme en ' +
+                        race.name,
                     '_blank',
                   )
                 }
@@ -340,6 +345,14 @@ function RaceCard({ race }: { race: Race }) {
               <Button
                 variant="outline"
                 className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                onClick={() =>
+                  window.open(
+                    race.infoUrl ||
+                      'https://wa.me/50769001234?text=Hola, quiero más información sobre ' +
+                        race.name,
+                    '_blank',
+                  )
+                }
               >
                 Más Información
               </Button>

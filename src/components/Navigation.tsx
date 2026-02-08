@@ -27,11 +27,7 @@ export function Navigation() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <a href="/" className="flex items-center">
-            <img
-              src="/favicon.svg"
-              alt="Stryd Panamá"
-              className="h-12 w-auto"
-            />
+            <img src="/logo.png" alt="Stryd Panamá" className="h-12 w-auto" />
           </a>
 
           {/* Desktop Navigation */}
