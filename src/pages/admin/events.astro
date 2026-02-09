@@ -1,0 +1,310 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro'
+import { getDb } from '../../db/client'
+import { events } from '../../db/schema'
+import { desc } from 'drizzle-orm'
+
+const db = getDb(Astro.locals.runtime.env.DB)
+const allEvents = await db
+  .select()
+  .from(events)
+  .orderBy(desc(events.date))
+  .all()
+---
+
+<AdminLayout title="Gestionar Eventos">
+  <div
+    class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4"
+  >
+    <h1 class="text-2xl font-bold text-foreground">Eventos del Calendario</h1>
+    <button
+      id="newEventBtn"
+      class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center gap-2 w-full sm:w-auto justify-center"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+          clip-rule="evenodd"></path>
+      </svg>
+      Nuevo Evento
+    </button>
+  </div>
+
+  <div class="bg-card rounded-lg shadow border border-border overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-muted">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+              >Título</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+              >Fecha</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+              >Ubicación</th
+            >
+            <th
+              class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider"
+              >Acciones</th
+            >
+          </tr>
+        </thead>
+        <tbody class="bg-card divide-y divide-border" id="eventsTableBody">
+          {
+            allEvents.length === 0 ? (
+              <tr>
+                <td
+                  colspan="4"
+                  class="px-6 py-10 text-center text-muted-foreground"
+                >
+                  No hay eventos todavía.
+                </td>
+              </tr>
+            ) : (
+              allEvents.map((event) => (
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-card-foreground">
+                    {event.title}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                    {event.date ? new Date(event.date).toLocaleString() : '-'}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                    {event.location}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      class="text-primary hover:text-primary/80 mr-4 edit-btn"
+                      data-event={JSON.stringify(event)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="text-destructive hover:text-destructive/80 delete-btn"
+                      data-id={event.id}
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    id="eventModal"
+    class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4"
+  >
+    <div
+      class="bg-card rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-border"
+    >
+      <div class="p-6 border-b border-border">
+        <h2 id="modalTitle" class="text-xl font-bold text-card-foreground">
+          Nuevo Evento
+        </h2>
+      </div>
+      <form id="eventForm" class="p-6">
+        <input type="hidden" id="eventId" name="id" />
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="title">Título</label
+          >
+          <input
+            type="text"
+            name="title"
+            id="title"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            required
+          />
+        </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="date">Fecha y Hora</label
+          >
+          <input
+            type="datetime-local"
+            name="date"
+            id="date"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            required
+          />
+        </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="location">Ubicación</label
+          >
+          <input
+            type="text"
+            name="location"
+            id="location"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="description">Descripción</label
+          >
+          <textarea
+            name="description"
+            id="description"
+            rows="4"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end pt-4 border-t border-border mt-4">
+          <button
+            type="button"
+            id="cancelBtn"
+            class="bg-secondary text-secondary-foreground px-4 py-2 rounded mr-2 hover:bg-secondary/80 transition"
+            >Cancelar</button
+          >
+          <button
+            type="submit"
+            class="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90 transition"
+            >Guardar</button
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const modal = document.getElementById('eventModal')
+  const form = document.getElementById('eventForm')
+  const modalTitle = document.getElementById('modalTitle')
+  const newEventBtn = document.getElementById('newEventBtn')
+  const cancelBtn = document.getElementById('cancelBtn')
+  const eventIdInput = document.getElementById('eventId')
+  const titleInput = document.getElementById('title')
+  const dateInput = document.getElementById('date')
+  const locationInput = document.getElementById('location')
+  const descriptionInput = document.getElementById('description')
+
+  function openModal(isEdit = false) {
+    modal.classList.remove('hidden')
+    modalTitle.textContent = isEdit ? 'Editar Evento' : 'Nuevo Evento'
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden')
+    form.reset()
+    eventIdInput.value = ''
+  }
+
+  newEventBtn.addEventListener('click', () => {
+    openModal(false)
+  })
+
+  cancelBtn.addEventListener('click', closeModal)
+
+  // Close on outside click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal()
+  })
+
+  // Edit buttons
+  document.querySelectorAll('.edit-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const event = JSON.parse(btn.getAttribute('data-event'))
+      eventIdInput.value = event.id
+      titleInput.value = event.title
+      // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
+      const d = new Date(event.date)
+      // Adjust to local timezone roughly for input string or use ISO string slice
+      const dateString = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16)
+      dateInput.value = dateString
+
+      locationInput.value = event.location || ''
+      descriptionInput.value = event.description || ''
+      openModal(true)
+    })
+  })
+
+  // Delete buttons
+  document.querySelectorAll('.delete-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('¿Estás seguro de que quieres eliminar este evento?')) return
+
+      const id = btn.getAttribute('data-id')
+      try {
+        const res = await fetch(`/api/events/${id}`, { method: 'DELETE' })
+        if (res.ok) {
+          window.location.reload()
+        } else {
+          alert('Error al eliminar')
+        }
+      } catch (e) {
+        console.error(e)
+        alert('Error al eliminar')
+      }
+    })
+  })
+
+  // Form submission
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const id = eventIdInput.value
+    const data = {
+      title: titleInput.value,
+      date: dateInput.value,
+      location: locationInput.value,
+      description: descriptionInput.value,
+    }
+
+    try {
+      let res
+      if (id) {
+        // Update
+        res = await fetch(`/api/events/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+      } else {
+        // Create
+        res = await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+      }
+
+      if (res.ok) {
+        closeModal()
+        window.location.reload()
+      } else {
+        alert('Error al guardar')
+      }
+    } catch (e) {
+      console.error(e)
+      alert('Error en la solicitud')
+    }
+  })
+</script>
