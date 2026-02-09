@@ -18,7 +18,6 @@ pnpm-debug.log*
 .env.production
 
 .wrangler/
-migrations/
 
 # macOS-specific files
 .DS_Store
