@@ -43,7 +43,18 @@ export function CalendarPage() {
     fetch('/api/events')
       .then((res) => res.json())
       .then((data) => {
-        setEvents(data as Event[])
+        // Normalize dates to YYYY-MM-DD string using UTC to avoid timezone shifts
+        const normalizedEvents = (data as any[]).map((e) => {
+          const d = new Date(e.date)
+          const year = d.getUTCFullYear()
+          const month = (d.getUTCMonth() + 1).toString().padStart(2, '0')
+          const day = d.getUTCDate().toString().padStart(2, '0')
+          return {
+            ...e,
+            date: `${year}-${month}-${day}`,
+          }
+        })
+        setEvents(normalizedEvents as Event[])
         setLoading(false)
       })
       .catch((err) => {
