@@ -130,7 +130,7 @@ export function TeamPage() {
       </section>
 
       {/* Filters */}
-      <section className="py-8 bg-white/80 sticky top-[80px] z-50 border-b border-gray-100 backdrop-blur-md">
+      <section className="py-8 bg-white/80 top-[80px] z-50 border-b border-gray-100 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-2 justify-center">
             {filters.map((filter) => (
