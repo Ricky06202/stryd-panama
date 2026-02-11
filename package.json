@@ -3,12 +3,12 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "wrangler dev --remote",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "wrangler d1 migrations apply strydpanama-db"
+    "db:migrate": "wrangler d1 migrations apply strydpanama-db --remote"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",

@@ -53,19 +53,46 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     }
   }
 
-  if (data.date && typeof data.date === 'string') {
-    data.date = new Date(data.date)
+  if (data.date) {
+    try {
+      data.date = new Date(data.date)
+      if (isNaN(data.date.getTime())) throw new Error('Invalid date')
+    } catch (e) {
+      console.error('Error parsing date:', data.date)
+      return new Response(
+        JSON.stringify({ error: 'Formato de fecha inválido' }),
+        { status: 400 },
+      )
+    }
   }
 
-  const updated = (await db
-    .update(events)
-    .set(data)
-    .where(eq(events.id, Number(id)))
-    .returning()) as any
+  try {
+    const updated = (await db
+      .update(events)
+      .set(data)
+      .where(eq(events.id, Number(id)))
+      .returning()) as any
 
-  return new Response(JSON.stringify(updated[0]), {
-    headers: { 'content-type': 'application/json' },
-  })
+    if (!updated || updated.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'No se pudo actualizar el evento' }),
+        { status: 404 },
+      )
+    }
+
+    return new Response(JSON.stringify(updated[0]), {
+      headers: { 'content-type': 'application/json' },
+    })
+  } catch (err: any) {
+    console.error('Error updating event:', err)
+    return new Response(
+      JSON.stringify({
+        error:
+          'Error en la base de datos: ' + (err.message || 'Error desconocido'),
+      }),
+      { status: 500 },
+    )
+  }
 }
 
 export const DELETE: APIRoute = async ({ params, locals }) => {

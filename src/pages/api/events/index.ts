@@ -15,8 +15,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const data = (await request.json()) as any
 
   // Ensure date is a Date object if coming as string
-  if (data.date && typeof data.date === 'string') {
-    data.date = new Date(data.date)
+  if (data.date) {
+    try {
+      data.date = new Date(data.date)
+      if (isNaN(data.date.getTime())) throw new Error('Invalid date')
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: 'Formato de fecha inválido' }),
+        { status: 400 },
+      )
+    }
+  } else {
+    return new Response(JSON.stringify({ error: 'La fecha es obligatoria' }), {
+      status: 400,
+    })
   }
 
   const newEvent = (await db.insert(events).values(data).returning()) as any
