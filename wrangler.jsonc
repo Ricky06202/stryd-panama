@@ -1,21 +1,31 @@
 {
-  "main": "dist/_worker.js/index.js",
-  "name": "stryd-panama",
-  "compatibility_date": "2026-02-02",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./dist",
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "strydpanama-db",
-      "database_id": "a37c47e0-c9cc-48ad-a485-9732a527fd07",
-      "remote": true,
-    },
-  ],
-  "observability": {
-    "enabled": true,
-  },
+	"main": "dist/_worker.js/index.js",
+	"name": "stryd-panama",
+	"compatibility_date": "2026-02-02",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist",
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "strydpanama-db",
+			"database_id": "a37c47e0-c9cc-48ad-a485-9732a527fd07",
+			"remote": true,
+		},
+	],
+	"observability": {
+		"enabled": true,
+	},
+	"r2_buckets": [
+		{
+			"bucket_name": "strydpanama-bucket",
+			"binding": "strydpanama_bucket",
+			"remote": true
+		}
+	],
 }

@@ -13,9 +13,20 @@ export const GET: APIRoute = async ({ locals }) => {
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const db = getDb(locals.runtime.env.DB)
-  const data = await request.json()
+  const data = (await request.json()) as any
+
+  // Auto-generate slug if not provided
+  if (!data.slug && data.title) {
+    data.slug = data.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  }
+
   // TODO: Validate data
-  const newPost = await db.insert(posts).values(data).returning()
+  const newPost = (await db.insert(posts).values(data).returning()) as any
   return new Response(JSON.stringify(newPost), {
     status: 201,
     headers: { 'content-type': 'application/json' },

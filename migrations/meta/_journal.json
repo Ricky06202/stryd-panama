@@ -8,6 +8,27 @@
       "when": 1770596250236,
       "tag": "0000_strong_angel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1770775450819,
+      "tag": "0001_harsh_jamie_braddock",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1770775923199,
+      "tag": "0002_rich_puck",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1770778040646,
+      "tag": "0003_quiet_wolfsbane",
+      "breakpoints": true
     }
   ]
 }

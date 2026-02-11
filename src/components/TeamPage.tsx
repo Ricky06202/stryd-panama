@@ -232,13 +232,15 @@ export function TeamPage() {
                 Solicitar Información
               </Button>
             </a>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-gray-900 border-2 text-black hover:bg-gray-900 hover:text-white font-bold px-10 py-7 text-lg transition-all"
-            >
-              Ver Calendario de Entrenos
-            </Button>
+            <a href="/calendario">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-gray-900 border-2 text-black hover:bg-gray-900 hover:text-white font-bold px-10 py-7 text-lg transition-all"
+              >
+                Ver Calendario de Entrenos
+              </Button>
+            </a>
           </div>
         </div>
       </section>

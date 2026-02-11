@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -27,9 +27,6 @@ interface Event {
     | 'cumpleaños'
     | 'longrun'
     | 'clase'
-    | 'cumpleaños'
-    | 'longrun'
-    | 'clase'
   description: string
   cost: string
   classification: 'public' | 'team'
@@ -39,169 +36,21 @@ interface Event {
 export function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const events: Event[] = [
-    {
-      id: 1,
-      title: 'Entreno Grupal - Intervalos',
-      date: '2026-02-03',
-      time: '5:30 AM',
-      location: 'Parque Omar, David',
-      type: 'entreno',
-      description:
-        'Sesión de intervalos 6x800m a potencia crítica. Trae tu Stryd configurado.',
-      cost: 'Gratis',
-      classification: 'team',
-    },
-    {
-      id: 11,
-      title: 'Cumpleaños de Coach Ricardo',
-      date: '2026-02-05',
-      time: 'All Day',
-      location: 'N/A',
-      type: 'cumpleaños',
-      description: '¡Deseémosle un feliz cumpleaños al coach!',
-      cost: 'Gratis',
-      classification: 'public',
-    },
-
-    {
-      id: 2,
-      title: 'Carrera 10K Ciudad de David',
-      date: '2026-02-08',
-      time: '6:00 AM',
-      location: 'Centro de David',
-      type: 'competencia',
-      description:
-        'Evento local de 10K. Prueba tus zonas de potencia en competencia.',
-      cost: '$20.00',
-      classification: 'public',
-      gpxUrl: '/rutas/10k-david.gpx',
-    },
-    {
-      id: 3,
-      title: 'Rodaje Largo Grupal',
-      date: '2026-02-10',
-      time: '5:00 AM',
-      location: 'Ruta Boquete',
-      type: 'entreno',
-      description:
-        'Rodaje progresivo 25K. Ritmo conversacional subiendo potencia final 5K.',
-      cost: 'Gratis',
-      classification: 'team',
-      gpxUrl: '/rutas/rodaje-boquete.gpx',
-    },
-    {
-      id: 4,
-      title: 'Café Post-Entreno',
-      date: '2026-02-10',
-      time: '8:00 AM',
-      location: 'Café Ruiz, Boquete',
-      type: 'social',
-      description:
-        'Reunión social después del rodaje largo. Análisis de datos Stryd.',
-      cost: 'Consumo propio',
-      classification: 'public',
-    },
-    {
-      id: 5,
-      title: 'Entreno Técnico - Subidas',
-      date: '2026-02-12',
-      time: '5:30 AM',
-      location: 'Alto Boquete',
-      type: 'entreno',
-      description: 'Trabajo de fuerza en subidas controlando potencia. 8x3min.',
-      cost: 'Gratis',
-      classification: 'team',
-    },
-    {
-      id: 12,
-      title: 'Clase de Técnica de Carrera',
-      date: '2026-02-14',
-      time: '8:00 AM',
-      location: 'Pista de Atletismo',
-      type: 'clase',
-      description: 'Mejora tu eficiencia de carrera con drills específicos.',
-      cost: '$15.00',
-      classification: 'public',
-    },
-
-    {
-      id: 6,
-      title: 'Media Maratón Volcán',
-      date: '2026-02-15',
-      time: '7:00 AM',
-      location: 'Volcán, Chiriquí',
-      type: 'competencia',
-      description:
-        '21K con desnivel. Perfecto para aplicar gestión de potencia en terreno mixto.',
-      cost: '$35.00',
-      classification: 'public',
-      gpxUrl: '/rutas/media-volcan.gpx',
-    },
-    {
-      id: 7,
-      title: 'Entreno Grupal - Tempo',
-      date: '2026-02-17',
-      time: '5:30 AM',
-      location: 'Parque Omar, David',
-      type: 'entreno',
-      description:
-        'Tempo run 40min a zona 3 de potencia. Calentamiento y enfriamiento incluidos.',
-      cost: 'Gratis',
-      classification: 'team',
-    },
-    {
-      id: 8,
-      title: 'Charla: Nutrición para Runners',
-      date: '2026-02-20',
-      time: '7:00 PM',
-      location: 'Sede StrydPanama',
-      type: 'social',
-      description:
-        'Nutricionista invitada habla sobre estrategias de alimentación para rendimiento.',
-      cost: '$5.00',
-      classification: 'public',
-    },
-    {
-      id: 13,
-      title: 'Long Run: Distancia',
-      date: '2026-02-22',
-      time: '4:30 AM',
-      location: 'Boquete Loop',
-      type: 'longrun',
-      description: '30km a ritmo suave. Hidratación cada 5km.',
-      cost: 'Gratis',
-      classification: 'team',
-      gpxUrl: '/rutas/long-run-boquete.gpx',
-    },
-
-    {
-      id: 9,
-      title: 'Entreno Grupal - Fartlek',
-      date: '2026-02-24',
-      time: '5:30 AM',
-      location: 'Parque Omar, David',
-      type: 'entreno',
-      description:
-        'Fartlek guiado por potencia. Variaciones de intensidad basadas en CP.',
-      cost: 'Gratis',
-      classification: 'team',
-    },
-    {
-      id: 10,
-      title: 'Maratón de Panamá',
-      date: '2026-02-28',
-      time: '5:00 AM',
-      location: 'Ciudad de Panamá',
-      type: 'competencia',
-      description:
-        'Maratón oficial. ¡El team completo estará presente! Pacing por potencia.',
-      cost: '$60.00',
-      classification: 'public',
-    },
-  ]
-
+  useEffect(() => {
+    fetch('/api/events')
+      .then((res) => res.json())
+      .then((data) => {
+        setEvents(data as Event[])
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Error fetching events:', err)
+        setLoading(false)
+      })
+  }, [])
   const getTypeBadgeColor = (type: Event['type']) => {
     switch (type) {
       case 'entreno':
@@ -677,12 +526,14 @@ export function CalendarPage() {
             Todos los miembros del team tienen acceso completo al calendario y
             eventos exclusivos
           </p>
-          <Button
-            size="lg"
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-6 text-lg shadow-lg shadow-orange-500/30"
-          >
-            Únete al Team StrydPanama
-          </Button>
+          <a href="/unete">
+            <Button
+              size="lg"
+              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-6 text-lg shadow-lg shadow-orange-500/30"
+            >
+              Únete al Team StrydPanama
+            </Button>
+          </a>
         </div>
       </section>
     </div>

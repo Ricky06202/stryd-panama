@@ -1,0 +1,429 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro'
+import { getDb } from '../../db/client'
+import { gallery } from '../../db/schema'
+import { desc, asc } from 'drizzle-orm'
+
+const db = getDb(Astro.locals.runtime.env.DB)
+const allItems = await db
+  .select()
+  .from(gallery)
+  .orderBy(asc(gallery.displayOrder), desc(gallery.createdAt))
+  .all()
+---
+
+<AdminLayout title="Gestionar Galería">
+  <div
+    class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4"
+  >
+    <h1 class="text-2xl font-bold text-foreground">Galería de Fotos</h1>
+    <button
+      id="newItemBtn"
+      class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center gap-2 w-full sm:w-auto justify-center"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+          clip-rule="evenodd"></path>
+      </svg>
+      Subir Foto
+    </button>
+  </div>
+
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    id="galleryGrid"
+  >
+    {
+      allItems.length === 0 ? (
+        <div class="col-span-full py-20 text-center text-muted-foreground bg-card rounded-lg border border-dashed border-border font-medium">
+          La galería está vacía. Empieza subiendo tu primera foto.
+        </div>
+      ) : (
+        allItems.map((item) => (
+          <div class="bg-card rounded-xl overflow-hidden border border-border group relative flex flex-col">
+            <div class="aspect-square bg-muted relative">
+              <img
+                src={`/api/files/${item.imageUrl}`}
+                alt={item.caption || 'Foto de galería'}
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                <button
+                  class="bg-white text-black p-2 rounded-full hover:bg-gray-200 edit-btn"
+                  data-item={JSON.stringify(item)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  class="bg-destructive text-destructive-foreground p-2 rounded-full hover:bg-destructive/90 delete-btn"
+                  data-id={item.id}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 flex-1 flex flex-col">
+              <p class="text-sm font-medium text-foreground line-clamp-2 mb-2">
+                {item.caption || 'Sin leyenda'}
+              </p>
+              {item.link && (
+                <a
+                  href={item.link}
+                  target="_blank"
+                  class="text-xs text-primary hover:underline flex items-center gap-1 mt-auto"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3 w-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                  Ver enlace
+                </a>
+              )}
+              <div class="text-[10px] text-muted-foreground mt-2">
+                Orden: {item.displayOrder}
+              </div>
+            </div>
+          </div>
+        ))
+      )
+    }
+  </div>
+
+  <!-- Modal -->
+  <div
+    id="itemModal"
+    class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4"
+  >
+    <div class="bg-card rounded-lg w-full max-w-md border border-border">
+      <div class="p-6 border-b border-border flex justify-between items-center">
+        <h2 id="modalTitle" class="text-xl font-bold text-card-foreground">
+          Nueva Foto
+        </h2>
+        <button
+          id="closeModalX"
+          class="text-muted-foreground hover:text-foreground"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <form id="itemForm" class="p-6">
+        <input type="hidden" id="itemId" name="id" />
+
+        <div class="mb-4">
+          <label class="block text-card-foreground text-sm font-bold mb-2"
+            >Imagen</label
+          >
+          <div
+            id="imagePreview"
+            class="mb-2 hidden h-48 w-full rounded overflow-hidden border border-border"
+          >
+            <img src="" class="w-full h-full object-cover" />
+          </div>
+          <input
+            type="file"
+            id="imageFile"
+            accept="image/*"
+            class="bg-input text-foreground text-sm shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+          <input type="hidden" name="imageUrl" id="imageUrl" required />
+          <p id="imageStatus" class="text-xs mt-1 text-muted-foreground"></p>
+        </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="caption">Leyenda (Caption)</label
+          >
+          <textarea
+            name="caption"
+            id="caption"
+            rows="3"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="Escribe algo sobre esta foto..."></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="link">Enlace (Opcional)</label
+          >
+          <input
+            type="url"
+            name="link"
+            id="link"
+            placeholder="https://instagram.com/p/..."
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="displayOrder">Orden de Visualización</label
+          >
+          <input
+            type="number"
+            name="displayOrder"
+            id="displayOrder"
+            value="0"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+
+        <div class="flex justify-end pt-4 border-t border-border">
+          <button
+            type="button"
+            id="cancelBtn"
+            class="bg-secondary text-secondary-foreground px-4 py-2 rounded mr-2 hover:bg-secondary/80 transition font-medium"
+            >Cancelar</button
+          >
+          <button
+            type="submit"
+            id="submitBtn"
+            class="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90 transition font-medium"
+            >Guardar</button
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const modal = document.getElementById('itemModal') as HTMLElement
+  const form = document.getElementById('itemForm') as HTMLFormElement
+  const modalTitle = document.getElementById('modalTitle') as HTMLElement
+  const newItemBtn = document.getElementById('newItemBtn') as HTMLButtonElement
+  const cancelBtn = document.getElementById('cancelBtn') as HTMLButtonElement
+  const closeX = document.getElementById('closeModalX') as HTMLButtonElement
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement
+
+  const itemIdInput = document.getElementById('itemId') as HTMLInputElement
+  const captionInput = document.getElementById('caption') as HTMLTextAreaElement
+  const linkInput = document.getElementById('link') as HTMLInputElement
+  const displayOrderInput = document.getElementById(
+    'displayOrder',
+  ) as HTMLInputElement
+  const imageUrlInput = document.getElementById('imageUrl') as HTMLInputElement
+  const imageFileInput = document.getElementById(
+    'imageFile',
+  ) as HTMLInputElement
+  const imagePreview = document.getElementById('imagePreview') as HTMLElement
+  const imagePreviewImg = imagePreview.querySelector('img') as HTMLImageElement
+  const imageStatus = document.getElementById('imageStatus') as HTMLElement
+
+  function openModal(isEdit = false) {
+    if (modal) modal.classList.remove('hidden')
+    if (modalTitle)
+      modalTitle.textContent = isEdit ? 'Editar Foto' : 'Nueva Foto'
+    if (!isEdit) {
+      imagePreview?.classList.add('hidden')
+      if (imageStatus) imageStatus.textContent = ''
+    }
+  }
+
+  function closeModal() {
+    if (modal) modal.classList.add('hidden')
+    if (form) form.reset()
+    if (itemIdInput) itemIdInput.value = ''
+    if (imagePreview) imagePreview.classList.add('hidden')
+    if (imageStatus) imageStatus.textContent = ''
+  }
+
+  newItemBtn?.addEventListener('click', () => openModal(false))
+  cancelBtn?.addEventListener('click', closeModal)
+  closeX?.addEventListener('click', closeModal)
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal()
+    })
+  }
+
+  // Handle Image Upload
+  imageFileInput?.addEventListener('change', async (e) => {
+    const target = e.target as HTMLInputElement
+    const file = target.files?.[0]
+    if (!file) return
+
+    if (imageStatus) {
+      imageStatus.textContent = 'Subiendo...'
+      imageStatus.className = 'text-xs mt-1 text-blue-500'
+    }
+    if (submitBtn) submitBtn.disabled = true
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = (await res.json()) as { key: string }
+        if (imageUrlInput) imageUrlInput.value = data.key
+        if (imagePreviewImg) imagePreviewImg.src = `/api/files/${data.key}`
+        imagePreview?.classList.remove('hidden')
+        if (imageStatus) {
+          imageStatus.textContent = 'Imagen subida con éxito'
+          imageStatus.className = 'text-xs mt-1 text-green-500'
+        }
+      } else {
+        if (imageStatus) {
+          imageStatus.textContent = 'Error al subir imagen'
+          imageStatus.className = 'text-xs mt-1 text-red-500'
+        }
+      }
+    } catch (err) {
+      console.error(err)
+      if (imageStatus) {
+        imageStatus.textContent = 'Error de conexión'
+        imageStatus.className = 'text-xs mt-1 text-red-500'
+      }
+    } finally {
+      if (submitBtn) submitBtn.disabled = false
+    }
+  })
+
+  // Edit logic
+  document.querySelectorAll('.edit-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const itemData = btn.getAttribute('data-item')
+      if (!itemData) return
+
+      const item = JSON.parse(itemData)
+      if (itemIdInput) itemIdInput.value = item.id
+      if (captionInput) captionInput.value = item.caption || ''
+      if (linkInput) linkInput.value = item.link || ''
+      if (displayOrderInput)
+        displayOrderInput.value = item.displayOrder?.toString() || '0'
+      if (imageUrlInput) imageUrlInput.value = item.imageUrl
+
+      if (imagePreviewImg && item.imageUrl) {
+        imagePreviewImg.src = `/api/files/${item.imageUrl}`
+        imagePreview?.classList.remove('hidden')
+      }
+
+      openModal(true)
+    })
+  })
+
+  // Delete logic
+  document.querySelectorAll('.delete-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('¿Estás seguro de que quieres eliminar esta foto?')) return
+
+      const id = btn.getAttribute('data-id')
+      try {
+        const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE' })
+        if (res.ok) window.location.reload()
+        else alert('Error al eliminar')
+      } catch (e) {
+        console.error(e)
+        alert('Error en la solicitud')
+      }
+    })
+  })
+
+  // Form submit
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const id = itemIdInput?.value
+    const data = {
+      caption: captionInput.value,
+      link: linkInput.value,
+      displayOrder: parseInt(displayOrderInput.value) || 0,
+      imageUrl: imageUrlInput.value,
+    }
+
+    if (!data.imageUrl) {
+      alert('La imagen es obligatoria')
+      return
+    }
+
+    try {
+      let res
+      if (id) {
+        res = await fetch(`/api/gallery/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+      } else {
+        res = await fetch('/api/gallery', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+      }
+
+      if (res.ok) {
+        closeModal()
+        window.location.reload()
+      } else {
+        const err = await res.text()
+        alert('Error al guardar: ' + err)
+      }
+    } catch (e) {
+      console.error(e)
+      alert('Error en la solicitud')
+    }
+  })
+</script>

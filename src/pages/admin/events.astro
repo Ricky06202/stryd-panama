@@ -47,6 +47,10 @@ const allEvents = await db
             >
             <th
               class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+              >Tipo</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
               >Fecha</th
             >
             <th
@@ -64,7 +68,7 @@ const allEvents = await db
             allEvents.length === 0 ? (
               <tr>
                 <td
-                  colspan="4"
+                  colspan="5"
                   class="px-6 py-10 text-center text-muted-foreground"
                 >
                   No hay eventos todavía.
@@ -77,7 +81,13 @@ const allEvents = await db
                     {event.title}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                    {event.date ? new Date(event.date).toLocaleString() : '-'}
+                    <span class="capitalize">{event.type || '-'}</span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                    {event.date
+                      ? new Date(event.date).toLocaleDateString()
+                      : '-'}{' '}
+                    {event.time && `(${event.time})`}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {event.location}
@@ -121,32 +131,98 @@ const allEvents = await db
       <form id="eventForm" class="p-6">
         <input type="hidden" id="eventId" name="id" />
 
-        <div class="mb-4">
-          <label
-            class="block text-card-foreground text-sm font-bold mb-2"
-            for="title">Título</label
-          >
-          <input
-            type="text"
-            name="title"
-            id="title"
-            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            required
-          />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label
+              class="block text-card-foreground text-sm font-bold mb-2"
+              for="title">Título</label
+            >
+            <input
+              type="text"
+              name="title"
+              id="title"
+              class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <label
+              class="block text-card-foreground text-sm font-bold mb-2"
+              for="type">Tipo de Evento</label
+            >
+            <select
+              name="type"
+              id="type"
+              class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              required
+            >
+              <option value="entreno">Entreno</option>
+              <option value="competencia">Competencia</option>
+              <option value="social">Social</option>
+              <option value="cumpleaños">Cumpleaños</option>
+              <option value="longrun">Long Run</option>
+              <option value="clase">Clase</option>
+            </select>
+          </div>
         </div>
 
-        <div class="mb-4">
-          <label
-            class="block text-card-foreground text-sm font-bold mb-2"
-            for="date">Fecha y Hora</label
-          >
-          <input
-            type="datetime-local"
-            name="date"
-            id="date"
-            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            required
-          />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label
+              class="block text-card-foreground text-sm font-bold mb-2"
+              for="date">Fecha</label
+            >
+            <input
+              type="date"
+              name="date"
+              id="date"
+              class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <label
+              class="block text-card-foreground text-sm font-bold mb-2"
+              for="time">Hora (ej: 5:30 AM)</label
+            >
+            <input
+              type="text"
+              name="time"
+              id="time"
+              placeholder="5:30 AM"
+              class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label
+              class="block text-card-foreground text-sm font-bold mb-2"
+              for="cost">Costo</label
+            >
+            <input
+              type="text"
+              name="cost"
+              id="cost"
+              placeholder="Gratis o $20.00"
+              class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-card-foreground text-sm font-bold mb-2"
+              for="classification">Clasificación</label
+            >
+            <select
+              name="classification"
+              id="classification"
+              class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="public">Todo Público</option>
+              <option value="team">Exclusivo Team</option>
+            </select>
+          </div>
         </div>
 
         <div class="mb-4">
@@ -170,9 +246,24 @@ const allEvents = await db
           <textarea
             name="description"
             id="description"
-            rows="4"
+            rows="3"
             class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           ></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="gpxFile">Archivo GPX (Opcional)</label
+          >
+          <input
+            type="file"
+            id="gpxFile"
+            accept=".gpx"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+          <input type="hidden" name="gpxUrl" id="gpxUrl" />
+          <p id="gpxStatus" class="text-xs mt-1 text-muted-foreground"></p>
         </div>
 
         <div class="flex justify-end pt-4 border-t border-border mt-4">
@@ -184,6 +275,7 @@ const allEvents = await db
           >
           <button
             type="submit"
+            id="submitBtn"
             class="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90 transition"
             >Guardar</button
           >
@@ -194,55 +286,138 @@ const allEvents = await db
 </AdminLayout>
 
 <script>
-  const modal = document.getElementById('eventModal')
-  const form = document.getElementById('eventForm')
-  const modalTitle = document.getElementById('modalTitle')
-  const newEventBtn = document.getElementById('newEventBtn')
-  const cancelBtn = document.getElementById('cancelBtn')
-  const eventIdInput = document.getElementById('eventId')
-  const titleInput = document.getElementById('title')
-  const dateInput = document.getElementById('date')
-  const locationInput = document.getElementById('location')
-  const descriptionInput = document.getElementById('description')
+  const modal = document.getElementById('eventModal') as HTMLElement
+  const form = document.getElementById('eventForm') as HTMLFormElement
+  const modalTitle = document.getElementById('modalTitle') as HTMLElement
+  const newEventBtn = document.getElementById(
+    'newEventBtn',
+  ) as HTMLButtonElement
+  const cancelBtn = document.getElementById('cancelBtn') as HTMLButtonElement
+  const eventIdInput = document.getElementById('eventId') as HTMLInputElement
+  const titleInput = document.getElementById('title') as HTMLInputElement
+  const typeInput = document.getElementById(
+    'type',
+  ) as unknown as HTMLSelectElement
+  const dateInput = document.getElementById('date') as HTMLInputElement
+  const timeInput = document.getElementById('time') as HTMLInputElement
+  const costInput = document.getElementById('cost') as HTMLInputElement
+  const classificationInput = document.getElementById(
+    'classification',
+  ) as unknown as HTMLSelectElement
+  const locationInput = document.getElementById('location') as HTMLInputElement
+  const descriptionInput = document.getElementById(
+    'description',
+  ) as unknown as HTMLTextAreaElement
+  const gpxFileInput = document.getElementById('gpxFile') as HTMLInputElement
+  const gpxUrlInput = document.getElementById('gpxUrl') as HTMLInputElement
+  const gpxStatus = document.getElementById('gpxStatus') as HTMLElement
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement
 
   function openModal(isEdit = false) {
-    modal.classList.remove('hidden')
-    modalTitle.textContent = isEdit ? 'Editar Evento' : 'Nuevo Evento'
+    if (modal) modal.classList.remove('hidden')
+    if (modalTitle)
+      modalTitle.textContent = isEdit ? 'Editar Evento' : 'Nuevo Evento'
+    if (gpxStatus) gpxStatus.textContent = ''
   }
 
   function closeModal() {
-    modal.classList.add('hidden')
-    form.reset()
-    eventIdInput.value = ''
+    if (modal) modal.classList.add('hidden')
+    if (form) form.reset()
+    if (eventIdInput) eventIdInput.value = ''
+    if (gpxUrlInput) gpxUrlInput.value = ''
   }
 
-  newEventBtn.addEventListener('click', () => {
-    openModal(false)
-  })
+  if (newEventBtn) {
+    newEventBtn.addEventListener('click', () => {
+      openModal(false)
+    })
+  }
 
-  cancelBtn.addEventListener('click', closeModal)
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal)
 
   // Close on outside click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal()
-  })
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal()
+    })
+  }
+
+  // Handle GPX File Upload
+  if (gpxFileInput) {
+    gpxFileInput.addEventListener('change', async (e) => {
+      const target = e.target as HTMLInputElement
+      const file = target.files?.[0]
+      if (!file) return
+
+      if (gpxStatus) {
+        gpxStatus.textContent = 'Subiendo...'
+        gpxStatus.className = 'text-xs mt-1 text-blue-500'
+      }
+      if (submitBtn) submitBtn.disabled = true
+
+      const formData = new FormData()
+      formData.append('file', file)
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (res.ok) {
+          const data = (await res.json()) as { key: string }
+          if (gpxUrlInput) gpxUrlInput.value = data.key
+          if (gpxStatus) {
+            gpxStatus.textContent = 'Archivo subido con éxito'
+            gpxStatus.className = 'text-xs mt-1 text-green-500'
+          }
+        } else {
+          if (gpxStatus) {
+            gpxStatus.textContent = 'Error al subir archivo'
+            gpxStatus.className = 'text-xs mt-1 text-red-500'
+          }
+        }
+      } catch (err) {
+        console.error(err)
+        if (gpxStatus) {
+          gpxStatus.textContent = 'Error de conexión'
+          gpxStatus.className = 'text-xs mt-1 text-red-500'
+        }
+      } finally {
+        if (submitBtn) submitBtn.disabled = false
+      }
+    })
+  }
 
   // Edit buttons
   document.querySelectorAll('.edit-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const event = JSON.parse(btn.getAttribute('data-event'))
-      eventIdInput.value = event.id
-      titleInput.value = event.title
-      // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
-      const d = new Date(event.date)
-      // Adjust to local timezone roughly for input string or use ISO string slice
-      const dateString = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16)
-      dateInput.value = dateString
+      const eventData = btn.getAttribute('data-event')
+      if (!eventData) return
 
-      locationInput.value = event.location || ''
-      descriptionInput.value = event.description || ''
+      const event = JSON.parse(eventData)
+      if (eventIdInput) eventIdInput.value = event.id
+      if (titleInput) titleInput.value = event.title
+      if (typeInput) typeInput.value = event.type || 'entreno'
+      if (costInput) costInput.value = event.cost || ''
+      if (classificationInput)
+        classificationInput.value = event.classification || 'public'
+      if (timeInput) timeInput.value = event.time || ''
+
+      // Format date for date input (YYYY-MM-DD)
+      if (event.date && dateInput) {
+        const d = new Date(event.date)
+        const dateString = d.toISOString().split('T')[0]
+        dateInput.value = dateString
+      }
+
+      if (locationInput) locationInput.value = event.location || ''
+      if (descriptionInput) descriptionInput.value = event.description || ''
+      if (gpxUrlInput) gpxUrlInput.value = event.gpxUrl || ''
+      if (event.gpxUrl && gpxStatus) {
+        gpxStatus.textContent = 'Archivo actual: ' + event.gpxUrl
+        gpxStatus.className = 'text-xs mt-1 text-muted-foreground'
+      }
       openModal(true)
     })
   })
@@ -268,43 +443,50 @@ const allEvents = await db
   })
 
   // Form submission
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const id = eventIdInput.value
-    const data = {
-      title: titleInput.value,
-      date: dateInput.value,
-      location: locationInput.value,
-      description: descriptionInput.value,
-    }
-
-    try {
-      let res
-      if (id) {
-        // Update
-        res = await fetch(`/api/events/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        })
-      } else {
-        // Create
-        res = await fetch('/api/events', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        })
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const id = eventIdInput?.value
+      const data = {
+        title: titleInput?.value,
+        type: typeInput?.value,
+        date: dateInput?.value,
+        time: timeInput?.value,
+        cost: costInput?.value,
+        classification: classificationInput?.value,
+        location: locationInput?.value,
+        description: descriptionInput?.value,
+        gpxUrl: gpxUrlInput?.value,
       }
 
-      if (res.ok) {
-        closeModal()
-        window.location.reload()
-      } else {
-        alert('Error al guardar')
+      try {
+        let res
+        if (id) {
+          // Update
+          res = await fetch(`/api/events/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          })
+        } else {
+          // Create
+          res = await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          })
+        }
+
+        if (res.ok) {
+          closeModal()
+          window.location.reload()
+        } else {
+          alert('Error al guardar')
+        }
+      } catch (e) {
+        console.error(e)
+        alert('Error en la solicitud')
       }
-    } catch (e) {
-      console.error(e)
-      alert('Error en la solicitud')
-    }
-  })
+    })
+  }
 </script>

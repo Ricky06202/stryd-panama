@@ -149,18 +149,36 @@ const allPosts = await db
             class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             required
           />
-          <p class="text-xs text-muted-foreground mt-1">Ej: mi-primer-post</p>
+          <p class="text-xs text-muted-foreground mt-1">
+            Se genera automáticamente del título si se deja vacío.
+          </p>
         </div>
 
         <div class="mb-4">
           <label
             class="block text-card-foreground text-sm font-bold mb-2"
-            for="image">Imagen URL</label
+            for="imageFile">Imagen del Post</label
           >
           <input
-            type="text"
-            name="image"
-            id="image"
+            type="file"
+            id="imageFile"
+            accept="image/*"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+          <p id="imageStatus" class="text-xs text-muted-foreground mt-1"></p>
+          <input type="hidden" name="image" id="image" />
+        </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="link">Link de Referencia (Opcional)</label
+          >
+          <input
+            type="url"
+            name="link"
+            id="link"
+            placeholder="https://example.com"
             class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
@@ -187,6 +205,7 @@ const allPosts = await db
           >
           <button
             type="submit"
+            id="submitBtn"
             class="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90 transition"
             >Guardar</button
           >
@@ -197,26 +216,59 @@ const allPosts = await db
 </AdminLayout>
 
 <script>
-  const modal = document.getElementById('postModal')
-  const form = document.getElementById('postForm')
-  const modalTitle = document.getElementById('modalTitle')
-  const newPostBtn = document.getElementById('newPostBtn')
-  const cancelBtn = document.getElementById('cancelBtn')
-  const postIdInput = document.getElementById('postId')
-  const titleInput = document.getElementById('title')
-  const slugInput = document.getElementById('slug')
-  const contentInput = document.getElementById('content')
-  const imageInput = document.getElementById('image')
+  const modal = document.getElementById('postModal') as HTMLDivElement
+  const form = document.getElementById('postForm') as HTMLFormElement
+  const modalTitle = document.getElementById('modalTitle') as HTMLHeadingElement
+  const newPostBtn = document.getElementById('newPostBtn') as HTMLButtonElement
+  const cancelBtn = document.getElementById('cancelBtn') as HTMLButtonElement
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement
+  const postIdInput = document.getElementById('postId') as HTMLInputElement
+  const titleInput = document.getElementById('title') as HTMLInputElement
+  const slugInput = document.getElementById('slug') as HTMLInputElement
+  const contentInput = document.getElementById('content') as HTMLTextAreaElement
+  const linkInput = document.getElementById('link') as HTMLInputElement
+  const imageInput = document.getElementById('image') as HTMLInputElement
+  const imageFileInput = document.getElementById(
+    'imageFile',
+  ) as HTMLInputElement
+  const imageStatus = document.getElementById(
+    'imageStatus',
+  ) as HTMLParagraphElement
+
+  function slugify(text: string) {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  }
+
+  titleInput.addEventListener('input', () => {
+    if (!slugInput.value || slugInput.dataset.auto === 'true') {
+      slugInput.value = slugify(titleInput.value)
+      slugInput.dataset.auto = 'true'
+    }
+  })
+
+  slugInput.addEventListener('input', () => {
+    slugInput.dataset.auto = 'false'
+  })
 
   function openModal(isEdit = false) {
     modal.classList.remove('hidden')
     modalTitle.textContent = isEdit ? 'Editar Post' : 'Nuevo Post'
+    if (!isEdit) {
+      slugInput.dataset.auto = 'true'
+      imageStatus.textContent = ''
+    }
   }
 
   function closeModal() {
     modal.classList.add('hidden')
     form.reset()
     postIdInput.value = ''
+    imageStatus.textContent = ''
   }
 
   newPostBtn.addEventListener('click', () => {
@@ -225,25 +277,62 @@ const allPosts = await db
 
   cancelBtn.addEventListener('click', closeModal)
 
-  // Close on outside click
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal()
   })
 
-  // Edit buttons
+  async function uploadImage(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    imageStatus.textContent = 'Subiendo imagen...'
+    submitBtn.disabled = true
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!res.ok) throw new Error('Error al subir')
+
+      const data = (await res.json()) as any
+      imageInput.value = data.key
+      imageStatus.textContent = 'Imagen subida con éxito'
+    } catch (err) {
+      console.error(err)
+      imageStatus.textContent = 'Error al subir imagen'
+      throw err
+    } finally {
+      submitBtn.disabled = false
+    }
+  }
+
+  imageFileInput.addEventListener('change', async () => {
+    if (imageFileInput.files && imageFileInput.files[0]) {
+      try {
+        await uploadImage(imageFileInput.files[0])
+      } catch (e) {
+        alert('Error al subir la imagen')
+      }
+    }
+  })
+
   document.querySelectorAll('.edit-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const post = JSON.parse(btn.getAttribute('data-post'))
+      const post = JSON.parse(btn.getAttribute('data-post') || '{}')
       postIdInput.value = post.id
       titleInput.value = post.title
       slugInput.value = post.slug
+      slugInput.dataset.auto = 'false'
       contentInput.value = post.content
+      linkInput.value = post.link || ''
       imageInput.value = post.image || ''
+      imageStatus.textContent = post.image ? 'Imagen actual: ' + post.image : ''
       openModal(true)
     })
   })
 
-  // Delete buttons
   document.querySelectorAll('.delete-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       if (!confirm('¿Estás seguro de que quieres eliminar este post?')) return
@@ -263,7 +352,6 @@ const allPosts = await db
     })
   })
 
-  // Form submission
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
     const id = postIdInput.value
@@ -272,19 +360,18 @@ const allPosts = await db
       slug: slugInput.value,
       content: contentInput.value,
       image: imageInput.value,
+      link: linkInput.value,
     }
 
     try {
       let res
       if (id) {
-        // Update
         res = await fetch(`/api/posts/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
       } else {
-        // Create
         res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -296,7 +383,8 @@ const allPosts = await db
         closeModal()
         window.location.reload()
       } else {
-        alert('Error al guardar')
+        const errData = (await res.json()) as any
+        alert('Error al guardar: ' + (errData.message || 'Error desconocido'))
       }
     } catch (e) {
       console.error(e)

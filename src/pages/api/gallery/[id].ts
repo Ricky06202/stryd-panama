@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
 import { getDb } from '../../../db/client'
-import { events } from '../../../db/schema'
+import { gallery } from '../../../db/schema'
 import { eq } from 'drizzle-orm'
 
 export const GET: APIRoute = async ({ params, locals }) => {
@@ -8,15 +8,15 @@ export const GET: APIRoute = async ({ params, locals }) => {
   const { id } = params
   if (!id) return new Response('ID required', { status: 400 })
 
-  const event = await db
+  const item = await db
     .select()
-    .from(events)
-    .where(eq(events.id, Number(id)))
+    .from(gallery)
+    .where(eq(gallery.id, Number(id)))
     .get()
 
-  if (!event) return new Response('Not found', { status: 404 })
+  if (!item) return new Response('Not found', { status: 404 })
 
-  return new Response(JSON.stringify(event), {
+  return new Response(JSON.stringify(item), {
     headers: { 'content-type': 'application/json' },
   })
 }
@@ -28,39 +28,36 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
 
   const data = (await request.json()) as any
 
-  // Get current event to check for existing gpxUrl
-  const currentEvent = await db
+  // Get current item to check for existing image
+  const currentItem = await db
     .select()
-    .from(events)
-    .where(eq(events.id, Number(id)))
+    .from(gallery)
+    .where(eq(gallery.id, Number(id)))
     .get()
 
-  if (!currentEvent) return new Response('Not found', { status: 404 })
+  if (!currentItem) return new Response('Not found', { status: 404 })
 
-  // If gpxUrl is being updated and there was a previous one, delete the old one from R2
+  // If imageUrl is being updated and there was a previous one, delete the old one from R2
   if (
-    data.gpxUrl !== undefined &&
-    currentEvent.gpxUrl &&
-    data.gpxUrl !== currentEvent.gpxUrl
+    data.imageUrl !== undefined &&
+    currentItem.imageUrl &&
+    data.imageUrl !== currentItem.imageUrl &&
+    !currentItem.imageUrl.startsWith('http')
   ) {
     const bucket = locals.runtime.env.strydpanama_bucket
     if (bucket) {
       try {
-        await bucket.delete(currentEvent.gpxUrl)
+        await bucket.delete(currentItem.imageUrl)
       } catch (err) {
-        console.error('Error deleting old file from R2:', err)
+        console.error('Error deleting old gallery image from R2:', err)
       }
     }
   }
 
-  if (data.date && typeof data.date === 'string') {
-    data.date = new Date(data.date)
-  }
-
   const updated = (await db
-    .update(events)
+    .update(gallery)
     .set(data)
-    .where(eq(events.id, Number(id)))
+    .where(eq(gallery.id, Number(id)))
     .returning()) as any
 
   return new Response(JSON.stringify(updated[0]), {
@@ -73,24 +70,24 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
   const { id } = params
   if (!id) return new Response('ID required', { status: 400 })
 
-  // Get event to check for gpxUrl before deleting
-  const event = await db
+  // Get item to check for image before deleting
+  const item = await db
     .select()
-    .from(events)
-    .where(eq(events.id, Number(id)))
+    .from(gallery)
+    .where(eq(gallery.id, Number(id)))
     .get()
 
-  if (event?.gpxUrl) {
+  if (item?.imageUrl && !item.imageUrl.startsWith('http')) {
     const bucket = locals.runtime.env.strydpanama_bucket
     if (bucket) {
       try {
-        await bucket.delete(event.gpxUrl)
+        await bucket.delete(item.imageUrl)
       } catch (err) {
-        console.error('Error deleting file from R2 on event delete:', err)
+        console.error('Error deleting gallery image from R2 on delete:', err)
       }
     }
   }
 
-  await db.delete(events).where(eq(events.id, Number(id)))
+  await db.delete(gallery).where(eq(gallery.id, Number(id)))
   return new Response(null, { status: 204 })
 }
