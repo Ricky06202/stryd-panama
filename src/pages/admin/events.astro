@@ -429,7 +429,7 @@ const allEvents = await db
 
       const id = btn.getAttribute('data-id')
       try {
-        const res = await fetch(`/api/events/${id}`, { method: 'DELETE' })
+        const res = await fetch(`/api/actividades/${id}`, { method: 'DELETE' })
         if (res.ok) {
           window.location.reload()
         } else {
@@ -463,14 +463,14 @@ const allEvents = await db
         let res
         if (id) {
           // Update
-          res = await fetch(`/api/events/${id}`, {
+          res = await fetch(`/api/actividades/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
           })
         } else {
           // Create
-          res = await fetch('/api/events', {
+          res = await fetch('/api/actividades', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),

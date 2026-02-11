@@ -34,13 +34,15 @@ interface Event {
 }
 
 export function CalendarPage() {
+  const [mounted, setMounted] = useState(false)
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/events')
+    setMounted(true)
+    fetch('/api/actividades')
       .then((res) => res.json())
       .then((data) => {
         // Normalize dates to YYYY-MM-DD string using UTC to avoid timezone shifts
@@ -62,6 +64,10 @@ export function CalendarPage() {
         setLoading(false)
       })
   }, [])
+
+  if (!mounted) {
+    return <div className="min-h-screen bg-white" />
+  }
   const getTypeBadgeColor = (type: Event['type']) => {
     switch (type) {
       case 'entreno':
