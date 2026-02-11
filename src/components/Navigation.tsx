@@ -16,6 +16,7 @@ export function Navigation() {
     { path: '/strydboard', label: 'StrydBoard' },
     { path: '/tienda', label: 'Tienda' },
     { path: '/blog', label: 'Blog' },
+    { path: '/galeria', label: 'Galería' },
   ]
 
   // In Astro, we can't use useLocation() in the same way in a client component easily without passing it.
