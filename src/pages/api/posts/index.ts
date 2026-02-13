@@ -1,11 +1,15 @@
 import type { APIRoute } from 'astro'
 import { getDb } from '../../../db/client' // Adjust path
 import { posts } from '../../../db/schema' // Adjust path
-import { eq } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 
 export const GET: APIRoute = async ({ locals }) => {
   const db = getDb(locals.runtime.env.DB)
-  const allPosts = await db.select().from(posts).all()
+  const allPosts = await db
+    .select()
+    .from(posts)
+    .orderBy(desc(posts.createdAt))
+    .all()
   return new Response(JSON.stringify(allPosts), {
     headers: { 'content-type': 'application/json' },
   })
