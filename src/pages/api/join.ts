@@ -18,18 +18,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
     let photoUrl = null
 
     if (photoFile && photoFile.size > 0) {
-      const bucket = locals.runtime.env.R2_BUCKET // Asegúrate de que este nombre coincida con tu binding
+      const bucket = locals.runtime.env.strydpanama_bucket
+      if (!bucket) {
+        throw new Error('R2 bucket binding not found')
+      }
       const fileExtension = photoFile.name.split('.').pop()
       const fileName = `profiles/${Date.now()}-${fullName.toLowerCase().replace(/\s+/g, '-')}.${fileExtension}`
       
+      const arrayBuffer = await photoFile.arrayBuffer()
+
       // Subir a R2
-      await bucket.put(fileName, photoFile, {
+      await bucket.put(fileName, arrayBuffer, {
         httpMetadata: { contentType: photoFile.type }
       })
       
-      // Generar URL (Asumiendo que tienes un dominio personalizado o worker para servir R2)
-      // Si usas el subdominio de R2, ajústalo aquí. Por ahora usamos un placeholder.
-      photoUrl = `/api/images/${fileName}` // O la URL pública de tu bucket
+      // Generar URL usando el endpoint de archivos existente
+      photoUrl = `/api/files/${fileName}`
     }
 
     // 1. Crear el usuario en D1
