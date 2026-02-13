@@ -90,6 +90,7 @@ export const membershipRequests = sqliteTable('membership_requests', {
   hasTrainedWithStryd: text('has_trained_with_stryd'),
   hasStructuredTraining: text('has_structured_training'),
   discoveryMethod: text('discovery_method'),
+  isAlreadyMember: integer('is_already_member', { mode: 'boolean' }).default(false),
   
   status: text('status').default('pending'), // pending, approved, rejected
   createdAt: integer('created_at', { mode: 'timestamp' }).default(

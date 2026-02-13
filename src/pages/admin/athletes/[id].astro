@@ -1,0 +1,273 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getDb } from '../../../db/client'
+import { users, membershipRequests } from '../../../db/schema'
+import { eq, desc } from 'drizzle-orm'
+
+const { id } = Astro.params
+const athleteId = parseInt(id || '')
+
+if (isNaN(athleteId)) {
+  return Astro.redirect('/admin/athletes')
+}
+
+const runtime = Astro.locals.runtime;
+const db = getDb(runtime.env.DB);
+
+// Obtener información del usuario
+const athlete = await db
+  .select()
+  .from(users)
+  .where(eq(users.id, athleteId))
+  .get()
+
+if (!athlete) {
+  return Astro.redirect('/admin/athletes')
+}
+
+// Obtener la solicitud más reciente para este usuario (para ver sus objetivos)
+const lastRequest = await db
+  .select()
+  .from(membershipRequests)
+  .where(eq(membershipRequests.userId, athleteId))
+  .orderBy(desc(membershipRequests.createdAt))
+  .limit(1)
+  .get()
+
+// Parsear objetivos si existen
+let goals = []
+if (lastRequest?.trainingGoals) {
+  try {
+    goals = JSON.parse(lastRequest.trainingGoals)
+  } catch (e) {
+    goals = []
+  }
+}
+---
+
+<AdminLayout title={`Perfil de Atleta: ${athlete.fullName}`}>
+  <div class="mb-8">
+    <a href="/admin/athletes" class="text-primary hover:underline flex items-center gap-2 mb-4">
+      ← Volver a atletas
+    </a>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-foreground">{athlete.fullName}</h1>
+        <p class="text-muted-foreground mt-1">
+          Miembro del equipo desde {athlete.createdAt?.toLocaleDateString('es-PA')}
+        </p>
+      </div>
+      <div class="flex gap-3">
+        <!-- Podríamos añadir botones para editar o dar de baja en el futuro -->
+        <span class="px-4 py-2 bg-green-500/10 text-green-500 font-bold rounded-lg border border-green-500/20">
+          Estado: Activo
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Columna Izquierda: Foto e Info Básica -->
+    <div class="space-y-6">
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm text-center">
+        <div class="aspect-square rounded-full overflow-hidden mb-6 border-4 border-primary/20 bg-muted mx-auto max-w-[200px]">
+          {athlete.photoUrl ? (
+            <img src={athlete.photoUrl} alt={athlete.fullName} class="w-full h-full object-cover" />
+          ) : (
+            <div class="w-full h-full flex items-center justify-center text-muted-foreground">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+          )}
+        </div>
+        
+        <h2 class="text-xl font-bold mb-1">{athlete.fullName}</h2>
+        <p class="text-muted-foreground text-sm mb-6">{athlete.email}</p>
+
+        <div class="space-y-4 text-left text-sm border-t border-border pt-6">
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">Cédula / ID:</span>
+            <span class="font-medium">{athlete.idCard}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">Teléfono:</span>
+            <span class="font-medium">{athlete.phone || 'N/A'}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">Provincia:</span>
+            <span class="font-medium">{athlete.province || 'N/A'}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">Género:</span>
+            <span class="font-medium">{athlete.gender || 'N/A'}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">Nacimiento:</span>
+            <span class="font-medium">{athlete.birthDate || 'N/A'}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-yellow-500/10 rounded-lg">🏆</span>
+          Mejores Marcas
+        </h2>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <span class="text-sm font-bold">5K</span>
+            <span class="text-primary font-mono font-bold">{athlete.record5k || '--:--'}</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <span class="text-sm font-bold">10K</span>
+            <span class="text-primary font-mono font-bold">{athlete.record10k || '--:--'}</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <span class="text-sm font-bold">21K</span>
+            <span class="text-primary font-mono font-bold">{athlete.record21k || '--:--'}</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <span class="text-sm font-bold">42K</span>
+            <span class="text-primary font-mono font-bold">{athlete.record42k || '--:--'}</span>
+          </div>
+          <div class="pt-2">
+            <p class="text-[10px] text-muted-foreground uppercase font-bold mb-1">Record W/kg</p>
+            <p class="text-2xl font-bold text-primary">{athlete.recordWkg || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna Central: Salud y Composición -->
+    <div class="space-y-6">
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-red-500/10 rounded-lg">🏥</span>
+          Ficha Médica
+        </h2>
+        <div class="space-y-4 text-sm">
+          <div>
+            <p class="text-muted-foreground">Tipo de Sangre</p>
+            <p class="font-medium text-lg">{athlete.bloodType || 'N/A'}</p>
+          </div>
+          <div class="p-3 bg-red-500/5 border border-red-500/10 rounded-lg">
+            <p class="text-red-500 text-xs font-bold uppercase mb-1">Alergias</p>
+            <p class="font-medium">{athlete.allergies || 'Ninguna reportada'}</p>
+          </div>
+          <div class="p-3 bg-muted/50 rounded-lg">
+            <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Enfermedades</p>
+            <p class="font-medium">{athlete.diseases || 'Ninguna reportada'}</p>
+          </div>
+          <div class="p-3 bg-muted/50 rounded-lg">
+            <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Lesiones Pasadas</p>
+            <p class="font-medium">{athlete.pastInjuries || 'Ninguna reportada'}</p>
+          </div>
+          <div class="p-3 bg-orange-500/5 border border-orange-500/10 rounded-lg">
+            <p class="text-orange-500 text-xs font-bold uppercase mb-1">Lesiones Actuales</p>
+            <p class="font-medium">{athlete.currentInjuries || 'Ninguna reportada'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-blue-500/10 rounded-lg">📏</span>
+          Biometría
+        </h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-3 bg-muted/50 rounded-lg">
+            <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Estatura</p>
+            <p class="text-xl font-bold">{athlete.height ? `${athlete.height} cm` : 'N/A'}</p>
+          </div>
+          <div class="p-3 bg-muted/50 rounded-lg">
+            <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Peso</p>
+            <p class="text-xl font-bold">{athlete.weight ? `${athlete.weight} kg` : 'N/A'}</p>
+          </div>
+          <div class="p-3 bg-muted/50 rounded-lg">
+            <p class="text-muted-foreground text-xs font-bold uppercase mb-1">% Grasa</p>
+            <p class="text-xl font-bold">{athlete.fatPercentage ? `${athlete.fatPercentage}%` : 'N/A'}</p>
+          </div>
+          <div class="p-3 bg-muted/50 rounded-lg">
+            <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Calzado</p>
+            <p class="font-medium">{athlete.footwearType || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Objetivos e Historial -->
+    <div class="space-y-6">
+      {lastRequest && (
+        <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+            <span class="p-1.5 bg-green-500/10 rounded-lg">🎯</span>
+            Objetivos del Atleta
+          </h2>
+          <div class="space-y-4 text-sm">
+            {goals.length > 0 && (
+              <div class="flex flex-wrap gap-2 mb-4">
+                {goals.map((goal: string) => (
+                  <span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded uppercase">
+                    {goal}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div class="space-y-3">
+              <div>
+                <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Corto Plazo</p>
+                <p class="font-medium italic">"{lastRequest.shortTermGoal || 'No definido'}"</p>
+              </div>
+              <div>
+                <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Mediano Plazo</p>
+                <p class="font-medium italic">"{lastRequest.mediumTermGoal || 'No definido'}"</p>
+              </div>
+              <div>
+                <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Largo Plazo</p>
+                <p class="font-medium italic">"{lastRequest.longTermGoal || 'No definido'}"</p>
+              </div>
+            </div>
+            
+            <div class="pt-4 border-t border-border">
+              <p class="text-muted-foreground text-xs font-bold uppercase mb-2">Entrenamiento</p>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span>Días/Semana:</span>
+                  <span class="font-bold">{lastRequest.trainingDaysPerWeek || 'N/A'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>¿Usa Stryd?:</span>
+                  <span class="font-bold">{lastRequest.hasTrainedWithStryd || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-purple-500/10 rounded-lg">🔗</span>
+          Plataformas
+        </h2>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border">
+            <div class="w-8 h-8 bg-[#FF5722] rounded flex items-center justify-center text-white font-bold">S</div>
+            <div>
+              <p class="text-[10px] text-muted-foreground uppercase font-bold">Stryd User</p>
+              <p class="text-sm font-medium">{athlete.strydUser || 'No vinculado'}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border">
+            <div class="w-8 h-8 bg-[#2196F3] rounded flex items-center justify-center text-white font-bold">FS</div>
+            <div>
+              <p class="text-[10px] text-muted-foreground uppercase font-bold">Final Surge</p>
+              <p class="text-sm font-medium">{athlete.finalSurgeUser || 'No vinculado'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>

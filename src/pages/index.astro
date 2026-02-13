@@ -4,27 +4,6 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, Zap, TrendingUp, Target } from 'lucide-react'
 import heroBackground from '../assets/hero_background.png'
-
-const testimonials = [
-  {
-    id: 1,
-    name: 'María González',
-    achievement: 'Maratón de Boston 2025',
-    text: 'Entrenar con potencia cambió completamente mi forma de correr. Ahora entiendo mi esfuerzo real y he mejorado mis tiempos sin sobreentrenarme.',
-  },
-  {
-    id: 2,
-    name: 'Carlos Rodríguez',
-    achievement: '10K PB: 38:45',
-    text: 'La metodología basada en Stryd me ayudó a romper mi barrera de 40 minutos en 10K. Ricardo sabe exactamente cómo optimizar cada entreno.',
-  },
-  {
-    id: 3,
-    name: 'Ana Martínez',
-    achievement: '21K PB: 1:42:30',
-    text: 'Correr con potencia es el futuro. Ya no me preocupo por el ritmo o la frecuencia cardíaca, simplemente sigo mi potencia objetivo y los resultados llegan.',
-  },
-]
 ---
 
 <Layout title="Stryd Panama | Entrena con Ciencia, Corre con Potencia">
@@ -164,54 +143,6 @@ const testimonials = [
               </p>
             </CardContent>
           </Card>
-        </div>
-      </div>
-    </section>
-
-    {/* Testimonials */}
-    <section class="py-20 relative overflow-hidden">
-      <div
-        class="absolute inset-0 bg-linear-to-b from-black via-orange-950/10 to-black"
-      >
-      </div>
-
-      <div class="relative z-10 max-w-7xl mx-auto px-4">
-        <div class="text-center mb-16">
-          <h2 class="text-4xl md:text-5xl font-bold mb-4 text-white">
-            Historias de <span
-              class="text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-yellow-500"
-              >Éxito</span
-            >
-          </h2>
-          <p class="text-xl text-gray-400">Lo que dicen nuestros atletas</p>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-8">
-          {
-            testimonials.map((testimonial) => (
-              <Card
-                key={testimonial.id}
-                className="bg-gray-900/50 border-orange-500/30 hover:border-orange-500 transition-all duration-300 hover:transform hover:scale-105 backdrop-blur-sm border"
-              >
-                <CardContent className="p-8">
-                  <div class="mb-6">
-                    <div class="w-16 h-16 rounded-full bg-linear-to-br from-orange-500 to-yellow-500 flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-black">
-                      {testimonial.name.charAt(0)}
-                    </div>
-                    <h4 class="font-bold text-white text-center text-lg">
-                      {testimonial.name}
-                    </h4>
-                    <p class="text-sm text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-yellow-500 text-center font-semibold">
-                      {testimonial.achievement}
-                    </p>
-                  </div>
-                  <p class="text-gray-400 italic leading-relaxed text-center">
-                    "{testimonial.text}"
-                  </p>
-                </CardContent>
-              </Card>
-            ))
-          }
         </div>
       </div>
     </section>

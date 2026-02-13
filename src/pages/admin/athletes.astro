@@ -1,0 +1,89 @@
+---
+import AdminLayout from '../layouts/AdminLayout.astro'
+import { getDb } from '../db/client'
+import { users } from '../db/schema'
+import { eq, desc } from 'drizzle-orm'
+
+const runtime = Astro.locals.runtime;
+const db = getDb(runtime.env.DB);
+
+// Obtener todos los atletas aprobados (isMember = true)
+const athletes = await db
+  .select()
+  .from(users)
+  .where(eq(users.isMember, true))
+  .orderBy(desc(users.createdAt))
+  .all()
+---
+
+<AdminLayout title="Gestión de Atletas">
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-foreground">Gestión de Atletas</h1>
+      <p class="text-muted-foreground mt-2">
+        Visualiza y gestiona la información de todos los miembros del equipo.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {athletes.length === 0 ? (
+      <div class="col-span-full bg-card rounded-xl border border-border p-12 text-center text-muted-foreground">
+        No hay atletas aprobados todavía.
+      </div>
+    ) : (
+      athletes.map((athlete) => (
+        <div class="bg-card rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition group">
+          <div class="aspect-video bg-muted relative overflow-hidden">
+            {athlete.photoUrl ? (
+              <img 
+                src={athlete.photoUrl} 
+                alt={athlete.fullName} 
+                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+            ) : (
+              <div class="w-full h-full flex items-center justify-center text-muted-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+            )}
+            <div class="absolute top-3 right-3">
+              <span class="px-2 py-1 bg-green-500 text-white text-[10px] font-bold uppercase rounded shadow-sm">
+                Miembro
+              </span>
+            </div>
+          </div>
+          
+          <div class="p-5">
+            <h3 class="text-lg font-bold text-foreground mb-1">{athlete.fullName}</h3>
+            <p class="text-sm text-muted-foreground mb-4 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              {athlete.email}
+            </p>
+            
+            <div class="grid grid-cols-2 gap-3 mb-5">
+              <div class="bg-muted/50 rounded-lg p-2 text-center">
+                <p class="text-[10px] text-muted-foreground uppercase font-bold">Cédula</p>
+                <p class="text-xs font-medium">{athlete.idCard}</p>
+              </div>
+              <div class="bg-muted/50 rounded-lg p-2 text-center">
+                <p class="text-[10px] text-muted-foreground uppercase font-bold">Teléfono</p>
+                <p class="text-xs font-medium">{athlete.phone || 'N/A'}</p>
+              </div>
+            </div>
+
+            <a 
+              href={`/admin/athletes/${athlete.id}`}
+              class="block w-full py-2 bg-primary hover:bg-primary/90 text-primary-foreground text-center text-sm font-bold rounded-lg transition"
+            >
+              Ver Perfil Completo
+            </a>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+</AdminLayout>

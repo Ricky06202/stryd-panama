@@ -110,11 +110,19 @@ try {
       <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
         <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
           <span class="p-1.5 bg-primary/10 rounded-lg">📋</span>
-          Estado del Miembro
+          Estado de Registro
         </h2>
-        <div class="flex items-center gap-2">
-          <div class={`w-3 h-3 rounded-full ${user.isMember ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-          <span class="font-medium">{user.isMember ? 'Ya es miembro' : 'Nuevo solicitante'}</span>
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 text-sm">
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <span class="font-medium">Pendiente de Aprobación</span>
+          </div>
+          <div class="p-3 bg-muted/50 rounded-lg text-xs">
+            <p class="text-muted-foreground uppercase font-bold mb-1">Declaración del Atleta:</p>
+            <p class="font-medium text-foreground">
+              {request.isAlreadyMember ? 'Afirma ser ya parte del equipo' : 'Nuevo ingreso / solicitud externa'}
+            </p>
+          </div>
         </div>
       </div>
     </div>

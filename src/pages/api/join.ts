@@ -51,7 +51,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         birthDate: formData.get('birthDate') as string,
         emergencyContactName: formData.get('emergencyContactName') as string,
         emergencyContactPhone: formData.get('emergencyContactPhone') as string,
-        isMember: isAlreadyMember,
+        isMember: false, // Siempre falso inicialmente, requiere aprobación
         photoUrl: photoUrl,
         // Records
         record5k: formData.get('record5k') as string,
@@ -59,22 +59,29 @@ export const POST: APIRoute = async ({ request, locals }) => {
         record21k: formData.get('record21k') as string,
         record42k: formData.get('record42k') as string,
         recordWkg: formData.get('recordWkg') as string,
+        strydUser: formData.get('strydUser') as string,
+        finalSurgeUser: formData.get('finalSurgeUser') as string,
       })
       .returning()
       .get()
 
-    // 2. Si no es miembro, crear solicitud de membresía
-    if (!isAlreadyMember) {
-      await db
-        .insert(membershipRequests)
-        .values({
-          userId: newUser.id,
-          goals: JSON.stringify(formData.getAll('goals')),
-          selectedPlan: formData.get('trainingDays') as string,
-          status: 'pending',
-        })
-        .run()
-    }
+    // 2. Crear solicitud de membresía (TODOS pasan por aquí ahora)
+    await db
+      .insert(membershipRequests)
+      .values({
+        userId: newUser.id,
+        trainingGoals: JSON.stringify(formData.getAll('goals')),
+        shortTermGoal: formData.get('shortTermGoal') as string,
+        mediumTermGoal: formData.get('mediumTermGoal') as string,
+        longTermGoal: formData.get('longTermGoal') as string,
+        trainingDaysPerWeek: formData.get('trainingDays') as string,
+        hasTrainedWithStryd: formData.get('hasTrainedWithStryd') as string,
+        hasStructuredTraining: formData.get('hasStructuredTraining') as string,
+        discoveryMethod: formData.get('discoveryMethod') as string,
+        isAlreadyMember: isAlreadyMember,
+        status: 'pending',
+      })
+      .run()
 
     return new Response(JSON.stringify({ 
       message: 'Registro completado con éxito', 
