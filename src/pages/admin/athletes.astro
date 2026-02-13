@@ -1,7 +1,7 @@
 ---
-import AdminLayout from '../layouts/AdminLayout.astro'
-import { getDb } from '../db/client'
-import { users } from '../db/schema'
+import AdminLayout from '../../layouts/AdminLayout.astro'
+import { getDb } from '../../db/client'
+import { users } from '../../db/schema'
 import { eq, desc } from 'drizzle-orm'
 
 const runtime = Astro.locals.runtime;
