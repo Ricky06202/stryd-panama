@@ -6,49 +6,77 @@ import { eq } from 'drizzle-orm'
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const db = getDb(locals.runtime.env.DB)
-    const data = await request.json()
+    const formData = await request.formData()
+    
+    // Obtener datos básicos
+    const isAlreadyMember = formData.get('isAlreadyMember') === 'true'
+    const email = formData.get('email') as string
+    const fullName = formData.get('fullName') as string
+    
+    // Manejo de la foto en R2
+    const photoFile = formData.get('photo') as File
+    let photoUrl = null
 
-    // 1. Crear el usuario
+    if (photoFile && photoFile.size > 0) {
+      const bucket = locals.runtime.env.R2_BUCKET // Asegúrate de que este nombre coincida con tu binding
+      const fileExtension = photoFile.name.split('.').pop()
+      const fileName = `profiles/${Date.now()}-${fullName.toLowerCase().replace(/\s+/g, '-')}.${fileExtension}`
+      
+      // Subir a R2
+      await bucket.put(fileName, photoFile, {
+        httpMetadata: { contentType: photoFile.type }
+      })
+      
+      // Generar URL (Asumiendo que tienes un dominio personalizado o worker para servir R2)
+      // Si usas el subdominio de R2, ajústalo aquí. Por ahora usamos un placeholder.
+      photoUrl = `/api/images/${fileName}` // O la URL pública de tu bucket
+    }
+
+    // 1. Crear el usuario en D1
     const newUser = await db
       .insert(users)
       .values({
-        fullName: data.fullName,
-        email: data.email,
-        idCard: data.idCard,
-        phone: data.phone,
-        password: data.password, // TODO: Hash password in production
-        gender: data.gender,
-        weight: data.weight,
-        height: data.height,
-        birthDate: data.birthDate,
-        emergencyContactName: data.emergencyContactName,
-        emergencyContactPhone: data.emergencyContactPhone,
-        isMember: data.isAlreadyMember === true,
-        // Records si existen
-        record5k: data.record5k,
-        record10k: data.record10k,
-        record21k: data.record21k,
-        record42k: data.record42k,
-        recordWkg: data.recordWkg,
-        photoUrl: data.photoUrl,
+        fullName: fullName,
+        email: email,
+        idCard: formData.get('idCard') as string,
+        phone: formData.get('phone') as string,
+        password: formData.get('password') as string,
+        gender: formData.get('gender') as string,
+        weight: Number(formData.get('weight')),
+        height: Number(formData.get('height')),
+        birthDate: formData.get('birthDate') as string,
+        emergencyContactName: formData.get('emergencyContactName') as string,
+        emergencyContactPhone: formData.get('emergencyContactPhone') as string,
+        isMember: isAlreadyMember,
+        photoUrl: photoUrl,
+        // Records
+        record5k: formData.get('record5k') as string,
+        record10k: formData.get('record10k') as string,
+        record21k: formData.get('record21k') as string,
+        record42k: formData.get('record42k') as string,
+        recordWkg: formData.get('recordWkg') as string,
       })
       .returning()
       .get()
 
     // 2. Si no es miembro, crear solicitud de membresía
-    if (data.isAlreadyMember === false) {
+    if (!isAlreadyMember) {
       await db
         .insert(membershipRequests)
         .values({
           userId: newUser.id,
-          goals: data.goals,
-          selectedPlan: data.selectedPlan,
+          goals: JSON.stringify(formData.getAll('goals')),
+          selectedPlan: formData.get('trainingDays') as string,
           status: 'pending',
         })
         .run()
     }
 
-    return new Response(JSON.stringify({ message: 'Registro completado con éxito', userId: newUser.id }), {
+    return new Response(JSON.stringify({ 
+      message: 'Registro completado con éxito', 
+      userId: newUser.id,
+      photoUrl: photoUrl 
+    }), {
       status: 201,
       headers: { 'content-type': 'application/json' },
     })

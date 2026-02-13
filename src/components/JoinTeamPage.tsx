@@ -19,22 +19,16 @@ export function JoinTeamPage() {
     setError(null)
 
     const formData = new FormData(e.target as HTMLFormElement)
-    const data = Object.fromEntries(formData.entries())
-
-    // Preparar el objeto para enviar
-    const payload = {
-      ...data,
-      isAlreadyMember,
-      // Los checkboxes necesitan manejo especial
-      goals: Array.from(formData.getAll('goals')),
-      distances: Array.from(formData.getAll('distances')),
+    
+    // Añadir el estado de membresía al FormData
+    if (isAlreadyMember !== null) {
+      formData.append('isAlreadyMember', String(isAlreadyMember))
     }
 
     try {
       const response = await fetch('/api/join', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: formData, // Enviar como FormData para soportar archivos
       })
 
       if (!response.ok) {
@@ -171,8 +165,8 @@ export function JoinTeamPage() {
                   <FormField label="Nombre Completo" id="nombre" name="fullName" />
                   <FormField label="Cédula" id="cedula" name="idCard" />
                   <div className="space-y-2">
-                    <Label htmlFor="foto" className="text-base font-bold text-gray-900">Foto</Label>
-                    <Input id="foto" name="photoUrl" type="text" placeholder="URL de la foto" className="cursor-pointer" />
+                    <Label htmlFor="foto" className="text-base font-bold text-gray-900">Foto de Perfil</Label>
+                    <Input id="foto" name="photo" type="file" accept="image/*" className="cursor-pointer" />
                   </div>
                   <FormField
                     label="Fecha de Nacimiento"
