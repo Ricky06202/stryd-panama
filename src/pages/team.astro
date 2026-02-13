@@ -1,8 +1,41 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { TeamPage as TeamContent } from '../components/TeamPage'
+import { getDb } from '../db/client'
+import { users } from '../db/schema'
+import { eq } from 'drizzle-orm'
+
+const runtime = Astro.locals.runtime;
+const db = getDb(runtime.env.DB);
+
+// Obtener atletas aprobados de la base de datos
+const dbAthletes = await db
+  .select({
+    id: users.id,
+    name: users.fullName,
+    image: users.photoUrl,
+    record42k: users.record42k,
+    record21k: users.record21k,
+    record10k: users.record10k,
+    record5k: users.record5k,
+    recordWkg: users.recordWkg,
+  })
+  .from(users)
+  .where(eq(users.isMember, true))
+  .all()
+
+// Mapear los datos de la DB al formato que espera el componente Athlete
+const initialAthletes = dbAthletes.map(a => ({
+  id: a.id,
+  name: a.name,
+  image: a.image || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop', // Fallback
+  distance: a.record42k ? '42K' : a.record21k ? '21K' : a.record10k ? '10K' : '5K',
+  achievement: a.record42k || a.record21k || a.record10k || a.record5k || 'Nuevo Miembro',
+  cp: a.recordWkg ? `${a.recordWkg} W/kg` : 'N/A',
+  category: (a.record42k ? '42k' : a.record21k ? '21k' : a.record10k ? '10k' : '5k') as any
+}))
 ---
 
 <Layout title="Nuestro Team | Stryd Panama">
-  <TeamContent client:load />
+  <TeamContent client:load initialAthletes={initialAthletes} />
 </Layout>

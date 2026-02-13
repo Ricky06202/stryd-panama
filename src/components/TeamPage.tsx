@@ -15,10 +15,15 @@ interface Athlete {
   category: '5k' | '10k' | '21k' | '42k' | 'ultra'
 }
 
-export function TeamPage() {
+interface TeamPageProps {
+  initialAthletes?: Athlete[]
+}
+
+export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>('todos')
 
-  const athletes: Athlete[] = [
+  // Combinar atletas estáticos con los que vienen de la base de datos
+  const staticAthletes: Athlete[] = [
     {
       id: 1,
       name: 'María González',
@@ -100,6 +105,8 @@ export function TeamPage() {
       category: 'ultra',
     },
   ]
+
+  const athletes = [...staticAthletes, ...initialAthletes]
 
   const filters = [
     { value: 'todos', label: 'Todos' },

@@ -78,5 +78,39 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
         Administrar eventos del calendario y carreras.
       </p>
     </a>
+
+    <a
+      href="/admin/requests"
+      class="group p-6 bg-card rounded-xl border border-border hover:border-primary/50 transition duration-300"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <h2
+          class="text-xl font-semibold text-card-foreground group-hover:text-primary transition"
+        >
+          Gestionar Solicitudes
+        </h2>
+        <div
+          class="p-2 bg-secondary rounded-lg group-hover:bg-primary/10 transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-muted-foreground group-hover:text-primary transition"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+            ></path>
+          </svg>
+        </div>
+      </div>
+      <p class="text-muted-foreground text-sm">
+        Aprobar o rechazar nuevos registros de miembros.
+      </p>
+    </a>
   </div>
 </AdminLayout>
