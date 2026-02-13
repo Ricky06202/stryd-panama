@@ -1,0 +1,315 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getDb } from '../../../db/client'
+import { users, membershipRequests } from '../../../db/schema'
+import { eq } from 'drizzle-orm'
+
+const { id } = Astro.params
+const requestId = parseInt(id || '')
+
+if (isNaN(requestId)) {
+  return Astro.redirect('/admin/requests')
+}
+
+const runtime = Astro.locals.runtime;
+const db = getDb(runtime.env.DB);
+
+// Obtener detalle de la solicitud y el usuario
+const requestData = await db
+  .select()
+  .from(membershipRequests)
+  .innerJoin(users, eq(membershipRequests.userId, users.id))
+  .where(eq(membershipRequests.id, requestId))
+  .get()
+
+if (!requestData) {
+  return Astro.redirect('/admin/requests')
+}
+
+const { users: user, membership_requests: request } = requestData
+
+// Parsear objetivos si es necesario
+let goals = []
+try {
+  goals = JSON.parse(request.trainingGoals || '[]')
+} catch (e) {
+  goals = []
+}
+---
+
+<AdminLayout title={`Detalle de Solicitud: ${user.fullName}`}>
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <a href="/admin/requests" class="text-primary hover:underline flex items-center gap-2 mb-4">
+        ← Volver a solicitudes
+      </a>
+      <h1 class="text-3xl font-bold text-foreground">{user.fullName}</h1>
+      <p class="text-muted-foreground mt-1">
+        Solicitud recibida el {request.createdAt?.toLocaleDateString('es-PA')}
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <button
+        onclick={`handleAction(${request.id}, 'approve')`}
+        class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition shadow-md"
+      >
+        Aprobar Atleta
+      </button>
+      <button
+        onclick={`handleAction(${request.id}, 'reject')`}
+        class="px-6 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 font-bold rounded-lg transition border border-red-500/20"
+      >
+        Rechazar
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Columna Izquierda: Foto e Info Básica -->
+    <div class="space-y-6">
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-primary/10 rounded-lg">👤</span>
+          Información Personal
+        </h2>
+        
+        <div class="aspect-square rounded-xl overflow-hidden mb-6 border border-border bg-muted">
+          {user.photoUrl ? (
+            <img src={user.photoUrl} alt={user.fullName} class="w-full h-full object-cover" />
+          ) : (
+            <div class="w-full h-full flex items-center justify-center text-muted-foreground">
+              Sin foto
+            </div>
+          )}
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div>
+            <p class="text-muted-foreground">Cédula / ID</p>
+            <p class="font-medium">{user.idCard}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Correo Electrónico</p>
+            <p class="font-medium">{user.email}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Teléfono</p>
+            <p class="font-medium">{user.phone || 'No proporcionado'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Género / Provincia</p>
+            <p class="font-medium">{user.gender || 'N/A'} - {user.province || 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Fecha de Nacimiento</p>
+            <p class="font-medium">{user.birthDate || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-primary/10 rounded-lg">📋</span>
+          Estado del Miembro
+        </h2>
+        <div class="flex items-center gap-2">
+          <div class={`w-3 h-3 rounded-full ${user.isMember ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+          <span class="font-medium">{user.isMember ? 'Ya es miembro' : 'Nuevo solicitante'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna Central: Salud y Composición -->
+    <div class="space-y-6">
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-red-500/10 rounded-lg">🏥</span>
+          Salud y Medicina
+        </h2>
+        <div class="space-y-4 text-sm">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-muted-foreground">Tipo de Sangre</p>
+              <p class="font-medium">{user.bloodType || 'N/A'}</p>
+            </div>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Alergias</p>
+            <p class="font-medium">{user.allergies || 'Ninguna'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Enfermedades</p>
+            <p class="font-medium">{user.diseases || 'Ninguna'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Lesiones Pasadas</p>
+            <p class="font-medium">{user.pastInjuries || 'Ninguna'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Lesiones Actuales</p>
+            <p class="font-medium text-red-500">{user.currentInjuries || 'Ninguna'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-blue-500/10 rounded-lg">📏</span>
+          Composición Corporal
+        </h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-muted-foreground">Estatura</p>
+            <p class="font-medium">{user.height ? `${user.height} cm` : 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Peso</p>
+            <p class="font-medium">{user.weight ? `${user.weight} kg` : 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">% Grasa</p>
+            <p class="font-medium">{user.fatPercentage ? `${user.fatPercentage}%` : 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Tipo de Calzado</p>
+            <p class="font-medium">{user.footwearType || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-orange-500/10 rounded-lg">🏃</span>
+          Entrenamiento
+        </h2>
+        <div class="space-y-4 text-sm">
+          <div>
+            <p class="text-muted-foreground">Días de entreno por semana</p>
+            <p class="font-medium">{request.trainingDaysPerWeek || 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">¿Ha entrenado con Stryd?</p>
+            <p class="font-medium">{request.hasTrainedWithStryd || 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">¿Entrenamiento estructurado?</p>
+            <p class="font-medium">{request.hasStructuredTraining || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Objetivos y Records -->
+    <div class="space-y-6">
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-green-500/10 rounded-lg">🎯</span>
+          Objetivos
+        </h2>
+        <div class="space-y-4 text-sm">
+          {goals.length > 0 && (
+            <div>
+              <p class="text-muted-foreground mb-2">Intereses</p>
+              <div class="flex flex-wrap gap-2">
+                {goals.map((goal: string) => (
+                  <span class="px-2 py-1 bg-primary/10 text-primary text-xs font-bold rounded">
+                    {goal}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <div>
+            <p class="text-muted-foreground">Corto Plazo</p>
+            <p class="font-medium">{request.shortTermGoal || 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Mediano Plazo</p>
+            <p class="font-medium">{request.mediumTermGoal || 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Largo Plazo</p>
+            <p class="font-medium">{request.longTermGoal || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-yellow-500/10 rounded-lg">🏆</span>
+          Records Personales
+        </h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-muted-foreground">5K</p>
+            <p class="font-medium">{user.record5k || '--:--'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">10K</p>
+            <p class="font-medium">{user.record10k || '--:--'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">21K</p>
+            <p class="font-medium">{user.record21k || '--:--'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">42K</p>
+            <p class="font-medium">{user.record42k || '--:--'}</p>
+          </div>
+          <div class="col-span-2 border-t border-border pt-2 mt-2">
+            <p class="text-muted-foreground">Record W/kg</p>
+            <p class="font-medium text-lg text-primary">{user.recordWkg || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-purple-500/10 rounded-lg">🔍</span>
+          Otros Detalles
+        </h2>
+        <div class="space-y-4 text-sm">
+          <div>
+            <p class="text-muted-foreground">Usuario Stryd</p>
+            <p class="font-medium">{user.strydUser || 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">Usuario Final Surge</p>
+            <p class="font-medium">{user.finalSurgeUser || 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-muted-foreground">¿Cómo nos encontró?</p>
+            <p class="font-medium">{request.discoveryMethod || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script is:inline>
+  async function handleAction(requestId, action) {
+    if (!confirm(`¿Estás seguro de que deseas ${action === 'approve' ? 'aprobar' : 'rechazar'} esta solicitud?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requestId, action }),
+      });
+
+      if (response.ok) {
+        window.location.href = '/admin/requests';
+      } else {
+        const data = await response.json();
+        alert('Error: ' + data.error);
+      }
+    } catch (error) {
+      alert('Error de conexión al procesar la solicitud');
+    }
+  }
+</script>
