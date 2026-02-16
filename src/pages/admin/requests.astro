@@ -8,7 +8,7 @@ const runtime = Astro.locals.runtime;
 const db = getDb(runtime.env.DB);
 
 // Obtener solicitudes pendientes
-const requests = await db
+const requestsRaw = await db
   .select({
     id: membershipRequests.id,
     status: membershipRequests.status,
@@ -26,6 +26,12 @@ const requests = await db
   .where(eq(membershipRequests.status, 'pending'))
   .orderBy(desc(membershipRequests.createdAt))
   .all()
+
+// Sanitizar datos para evitar DevalueError
+const requests = requestsRaw.map(req => ({
+  ...req,
+  createdAt: req.createdAt ? new Date(req.createdAt).toLocaleDateString('es-PA') : 'N/A'
+}))
 ---
 
 <AdminLayout title="Solicitudes de Registro">
@@ -78,7 +84,7 @@ const requests = await db
                   {req.user.phone || 'N/A'}
                 </td>
                 <td class="px-6 py-4 text-sm text-muted-foreground">
-                  {req.createdAt?.toLocaleDateString('es-PA')}
+                  {req.createdAt}
                 </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">

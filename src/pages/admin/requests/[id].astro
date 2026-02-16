@@ -26,7 +26,19 @@ if (!requestData) {
   return Astro.redirect('/admin/requests')
 }
 
-const { users: user, membership_requests: request } = requestData
+const { users: userData, membership_requests: requestDataRaw } = requestData
+
+// Asegurar que sean objetos planos y manejar fechas
+const user = {
+  ...userData,
+  createdAt: userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('es-PA') : null,
+  birthDate: userData.birthDate || 'N/A'
+}
+
+const request = {
+  ...requestDataRaw,
+  createdAt: requestDataRaw.createdAt ? new Date(requestDataRaw.createdAt).toLocaleDateString('es-PA') : null,
+}
 
 // Parsear objetivos si es necesario
 let goals = []
@@ -45,7 +57,7 @@ try {
       </a>
       <h1 class="text-3xl font-bold text-foreground">{user.fullName}</h1>
       <p class="text-muted-foreground mt-1">
-        Solicitud recibida el {request.createdAt?.toLocaleDateString('es-PA')}
+        Solicitud recibida el {request.createdAt}
       </p>
     </div>
     <div class="flex gap-3">
@@ -168,18 +180,18 @@ try {
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p class="text-muted-foreground">Estatura</p>
-            <p class="font-medium">{user.height ? `${user.height} cm` : 'N/A'}</p>
+            <p class="font-medium">{user.height !== null ? `${user.height} cm` : 'N/A'}</p>
           </div>
           <div>
             <p class="text-muted-foreground">Peso</p>
-            <p class="font-medium">{user.weight ? `${user.weight} kg` : 'N/A'}</p>
+            <p class="font-medium">{user.weight !== null ? `${user.weight} kg` : 'N/A'}</p>
           </div>
           <div>
             <p class="text-muted-foreground">% Grasa</p>
-            <p class="font-medium">{user.fatPercentage ? `${user.fatPercentage}%` : 'N/A'}</p>
+            <p class="font-medium">{user.fatPercentage !== null ? `${user.fatPercentage}%` : 'N/A'}</p>
           </div>
           <div>
-            <p class="text-muted-foreground">Tipo de Calzado</p>
+            <p class="text-muted-foreground">Tipo de Pisada</p>
             <p class="font-medium">{user.footwearType || 'N/A'}</p>
           </div>
         </div>

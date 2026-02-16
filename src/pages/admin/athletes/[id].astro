@@ -15,24 +15,35 @@ const runtime = Astro.locals.runtime;
 const db = getDb(runtime.env.DB);
 
 // Obtener información del usuario
-const athlete = await db
+const athleteData = await db
   .select()
   .from(users)
   .where(eq(users.id, athleteId))
   .get()
 
-if (!athlete) {
+if (!athleteData) {
   return Astro.redirect('/admin/athletes')
 }
 
+// Asegurar que sea un objeto plano y manejar fechas
+const athlete = {
+  ...athleteData,
+  createdAt: athleteData.createdAt ? new Date(athleteData.createdAt).toLocaleDateString('es-PA') : 'N/A',
+}
+
 // Obtener la solicitud más reciente para este usuario (para ver sus objetivos)
-const lastRequest = await db
+const lastRequestData = await db
   .select()
   .from(membershipRequests)
   .where(eq(membershipRequests.userId, athleteId))
   .orderBy(desc(membershipRequests.createdAt))
   .limit(1)
   .get()
+
+const lastRequest = lastRequestData ? {
+  ...lastRequestData,
+  createdAt: lastRequestData.createdAt ? new Date(lastRequestData.createdAt).toLocaleDateString('es-PA') : null,
+} : null
 
 // Parsear objetivos si existen
 let goals = []
@@ -54,7 +65,7 @@ if (lastRequest?.trainingGoals) {
       <div>
         <h1 class="text-3xl font-bold text-foreground">{athlete.fullName}</h1>
         <p class="text-muted-foreground mt-1">
-          Miembro del equipo desde {athlete.createdAt?.toLocaleDateString('es-PA')}
+          Miembro del equipo desde {athlete.createdAt}
         </p>
       </div>
       <div class="flex gap-3">
@@ -178,18 +189,18 @@ if (lastRequest?.trainingGoals) {
         <div class="grid grid-cols-2 gap-4">
           <div class="p-3 bg-muted/50 rounded-lg">
             <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Estatura</p>
-            <p class="text-xl font-bold">{athlete.height ? `${athlete.height} cm` : 'N/A'}</p>
+            <p class="text-xl font-bold">{athlete.height !== null ? `${athlete.height} cm` : 'N/A'}</p>
           </div>
           <div class="p-3 bg-muted/50 rounded-lg">
             <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Peso</p>
-            <p class="text-xl font-bold">{athlete.weight ? `${athlete.weight} kg` : 'N/A'}</p>
+            <p class="text-xl font-bold">{athlete.weight !== null ? `${athlete.weight} kg` : 'N/A'}</p>
           </div>
           <div class="p-3 bg-muted/50 rounded-lg">
             <p class="text-muted-foreground text-xs font-bold uppercase mb-1">% Grasa</p>
-            <p class="text-xl font-bold">{athlete.fatPercentage ? `${athlete.fatPercentage}%` : 'N/A'}</p>
+            <p class="text-xl font-bold">{athlete.fatPercentage !== null ? `${athlete.fatPercentage}%` : 'N/A'}</p>
           </div>
           <div class="p-3 bg-muted/50 rounded-lg">
-            <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Calzado</p>
+            <p class="text-muted-foreground text-xs font-bold uppercase mb-1">Tipo de Pisada</p>
             <p class="font-medium">{athlete.footwearType || 'N/A'}</p>
           </div>
         </div>

@@ -1,0 +1,1 @@
+ALTER TABLE `membership_requests` ADD `is_already_member` integer DEFAULT false;

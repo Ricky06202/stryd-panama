@@ -14,7 +14,10 @@ export function Navigation() {
     { path: '/calendario', label: 'Calendario' },
     { path: '/carreras', label: 'Carreras' },
     { path: '/strydboard', label: 'StrydBoard' },
-    { path: '/tienda', label: 'Tienda' },
+    {
+      path: 'https://tshirt-stryd.ricardosanjurg.workers.dev',
+      label: 'Tienda',
+    },
     { path: '/blog', label: 'Blog' },
     { path: '/galeria', label: 'Galería' },
   ]
@@ -37,6 +40,12 @@ export function Navigation() {
               <a
                 key={link.path}
                 href={link.path}
+                target={link.path.startsWith('http') ? '_blank' : undefined}
+                rel={
+                  link.path.startsWith('http')
+                    ? 'noopener noreferrer'
+                    : undefined
+                }
                 className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:bg-gray-800 hover:text-white"
               >
                 {link.label}
@@ -69,6 +78,12 @@ export function Navigation() {
                 key={link.path}
                 href={link.path}
                 onClick={() => setMobileMenuOpen(false)}
+                target={link.path.startsWith('http') ? '_blank' : undefined}
+                rel={
+                  link.path.startsWith('http')
+                    ? 'noopener noreferrer'
+                    : undefined
+                }
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
               >
                 {link.label}

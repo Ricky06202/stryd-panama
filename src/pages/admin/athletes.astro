@@ -8,12 +8,18 @@ const runtime = Astro.locals.runtime;
 const db = getDb(runtime.env.DB);
 
 // Obtener todos los atletas aprobados (isMember = true)
-const athletes = await db
+const athletesRaw = await db
   .select()
   .from(users)
   .where(eq(users.isMember, true))
   .orderBy(desc(users.createdAt))
   .all()
+
+// Sanitizar datos para evitar DevalueError
+const athletes = athletesRaw.map(athlete => ({
+  ...athlete,
+  createdAt: athlete.createdAt ? new Date(athlete.createdAt).toLocaleDateString('es-PA') : 'N/A'
+}))
 ---
 
 <AdminLayout title="Gestión de Atletas">
