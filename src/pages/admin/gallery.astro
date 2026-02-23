@@ -50,7 +50,12 @@ const allItems = await db
           <div class="bg-card rounded-xl overflow-hidden border border-border group relative flex flex-col">
             <div class="aspect-square bg-muted relative">
               <img
-                src={`/api/files/${item.imageUrl}`}
+                src={
+                  item.imageUrl.startsWith('http') ||
+                  item.imageUrl.startsWith('/')
+                    ? item.imageUrl
+                    : `/api/files/${item.imageUrl}`
+                }
                 alt={item.caption || 'Foto de galería'}
                 class="w-full h-full object-cover"
               />
@@ -135,7 +140,7 @@ const allItems = await db
   <!-- Modal -->
   <div
     id="itemModal"
-    class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4"
+    class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4"
   >
     <div class="bg-card rounded-lg w-full max-w-md border border-border">
       <div class="p-6 border-b border-border flex justify-between items-center">

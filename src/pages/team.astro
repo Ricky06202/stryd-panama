@@ -5,8 +5,8 @@ import { getDb } from '../db/client'
 import { users } from '../db/schema'
 import { eq } from 'drizzle-orm'
 
-const runtime = Astro.locals.runtime;
-const db = getDb(runtime.env.DB);
+const runtime = Astro.locals.runtime
+const db = getDb(runtime.env.DB)
 
 // Obtener atletas aprobados de la base de datos
 const dbAthletes = await db
@@ -25,14 +25,31 @@ const dbAthletes = await db
   .all()
 
 // Mapear los datos de la DB al formato que espera el componente Athlete
-const initialAthletes = dbAthletes.map(a => ({
+const initialAthletes = dbAthletes.map((a) => ({
   id: a.id,
   name: a.name,
-  image: a.image || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop', // Fallback
-  distance: a.record42k ? '42K' : a.record21k ? '21K' : a.record10k ? '10K' : '5K',
-  achievement: a.record42k || a.record21k || a.record10k || a.record5k || 'Nuevo Miembro',
+  image: a.image
+    ? a.image.startsWith('http') || a.image.startsWith('/')
+      ? a.image
+      : `/api/files/${a.image}`
+    : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop', // Fallback
+  distance: a.record42k
+    ? '42K'
+    : a.record21k
+      ? '21K'
+      : a.record10k
+        ? '10K'
+        : '5K',
+  achievement:
+    a.record42k || a.record21k || a.record10k || a.record5k || 'Nuevo Miembro',
   cp: a.recordWkg ? `${a.recordWkg} W/kg` : 'N/A',
-  category: (a.record42k ? '42k' : a.record21k ? '21k' : a.record10k ? '10k' : '5k') as any
+  category: (a.record42k
+    ? '42k'
+    : a.record21k
+      ? '21k'
+      : a.record10k
+        ? '10k'
+        : '5k') as any,
 }))
 ---
 

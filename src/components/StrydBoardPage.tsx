@@ -3,8 +3,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
+import { ImageWithFallback } from '@/components/figma/ImageWithFallback'
+import { Camera, Loader2 } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -37,7 +39,9 @@ export function StrydBoardPage() {
     'landing',
   )
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Expanded profile state to match Admin UI
   const [profile, setProfile] = useState({
@@ -161,6 +165,33 @@ export function StrydBoardPage() {
       setSaveMessage('Error de conexión')
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (response.ok) {
+        const data = (await response.json()) as { key: string }
+        setProfile((prev) => ({ ...prev, photoUrl: data.key }))
+      } else {
+        setSaveMessage('Error al subir la imagen')
+      }
+    } catch (error) {
+      setSaveMessage('Error de conexión al subir imagen')
+    } finally {
+      setIsUploading(false)
     }
   }
 
@@ -346,21 +377,56 @@ export function StrydBoardPage() {
             {/* Columna Izquierda: Foto e Info Básica */}
             <div className="space-y-6">
               <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl shadow-xl text-center">
-                <div className="w-32 h-32 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-orange-500/20 overflow-hidden">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-16 w-16 text-gray-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                <div className="relative w-32 h-32 mx-auto mb-6 group">
+                  <div className="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border-4 border-orange-500/20 overflow-hidden relative">
+                    {profile.photoUrl ? (
+                      <ImageWithFallback
+                        src={
+                          profile.photoUrl.startsWith('http') ||
+                          profile.photoUrl.startsWith('/')
+                            ? profile.photoUrl
+                            : `/api/files/${profile.photoUrl}`
+                        }
+                        alt={profile.fullName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-16 w-16 text-gray-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    )}
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 p-2 bg-orange-500 rounded-full text-white shadow-lg hover:bg-orange-600 transition-all border-2 border-gray-900"
+                    title="Cambiar foto"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
+                    <Camera className="w-4 h-4" />
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                    accept="image/*"
+                  />
                 </div>
                 <h2 className="text-2xl font-black mb-1">{profile.fullName}</h2>
                 <p className="text-gray-500 text-sm mb-8">{profile.email}</p>

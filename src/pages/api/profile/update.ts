@@ -32,6 +32,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       recordWkg,
       strydUser,
       finalSurgeUser,
+      photoUrl,
     } = data
 
     if (!userId) {
@@ -39,6 +40,27 @@ export const POST: APIRoute = async ({ request, locals }) => {
         status: 400,
         headers: { 'content-type': 'application/json' },
       })
+    }
+
+    // Manejo de borrado de imagen anterior para evitar huérfanos
+    if (photoUrl) {
+      const currentUser = await db
+        .select({ photoUrl: users.photoUrl })
+        .from(users)
+        .where(eq(users.id, userId))
+        .get()
+
+      if (currentUser?.photoUrl && currentUser.photoUrl !== photoUrl) {
+        const bucket = locals.runtime.env.strydpanama_bucket
+        if (bucket) {
+          try {
+            await bucket.delete(currentUser.photoUrl)
+            console.log(`Deleted old profile photo: ${currentUser.photoUrl}`)
+          } catch (deleteError) {
+            console.error('Error deleting old photo from R2:', deleteError)
+          }
+        }
+      }
     }
 
     await db
@@ -61,6 +83,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         recordWkg,
         strydUser,
         finalSurgeUser,
+        photoUrl,
       })
       .where(eq(users.id, userId))
       .run()
