@@ -33,6 +33,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       strydUser,
       finalSurgeUser,
       photoUrl,
+      startDate,
     } = data
 
     if (!userId) {
@@ -84,6 +85,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         strydUser,
         finalSurgeUser,
         photoUrl,
+        startDate,
       })
       .where(eq(users.id, userId))
       .run()

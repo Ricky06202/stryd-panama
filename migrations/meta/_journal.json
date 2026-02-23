@@ -43,6 +43,13 @@
       "when": 1771012888945,
       "tag": "0005_smiling_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1771887046478,
+      "tag": "0006_tough_ravenous",
+      "breakpoints": true
     }
   ]
 }

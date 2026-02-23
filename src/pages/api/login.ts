@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
 import { getDb } from '../../db/client'
-import { users } from '../../db/schema'
+import { users, userReviews } from '../../db/schema'
 import { eq } from 'drizzle-orm'
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -40,7 +40,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Retornar datos del usuario (excluyendo password por seguridad)
     const { password: _, ...userData } = user
 
-    return new Response(JSON.stringify(userData), {
+    // Buscar reseñas del usuario
+    const reviews = await db
+      .select()
+      .from(userReviews)
+      .where(eq(userReviews.userId, user.id))
+      .all()
+
+    return new Response(JSON.stringify({ ...userData, reviews }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })

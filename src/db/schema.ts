@@ -43,20 +43,20 @@ export const users = sqliteTable('users', {
   email: text('email').notNull().unique(),
   phone: text('phone'),
   password: text('password').notNull(),
-  
+
   // Salud
   bloodType: text('blood_type'),
   allergies: text('allergies'),
   diseases: text('diseases'),
   pastInjuries: text('past_injuries'),
   currentInjuries: text('current_injuries'),
-  
+
   // Composición corporal
   height: integer('height'),
   weight: integer('weight'),
   fatPercentage: integer('fat_percentage'),
   footwearType: text('footwear_type'),
-  
+
   // Records Personales
   record5k: text('record_5k'),
   record10k: text('record_10k'),
@@ -75,29 +75,32 @@ export const users = sqliteTable('users', {
 
 export const membershipRequests = sqliteTable('membership_requests', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+
   // Objetivos
   trainingGoals: text('training_goals'), // Almacenado como JSON string
   shortTermGoal: text('short_term_goal'),
   mediumTermGoal: text('medium_term_goal'),
   longTermGoal: text('long_term_goal'),
-  
+
   // Plan de Entreno
   trainingDaysPerWeek: text('training_days_per_week'),
-  
+
   // Preguntas Varias
   hasTrainedWithStryd: text('has_trained_with_stryd'),
   hasStructuredTraining: text('has_structured_training'),
   discoveryMethod: text('discovery_method'),
-  isAlreadyMember: integer('is_already_member', { mode: 'boolean' }).default(false),
-  
+  isAlreadyMember: integer('is_already_member', { mode: 'boolean' }).default(
+    false,
+  ),
+
   status: text('status').default('pending'), // pending, approved, rejected
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
     sql`(strftime('%s', 'now'))`,
   ),
 })
-
 
 export const gallery = sqliteTable('gallery', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -105,6 +108,17 @@ export const gallery = sqliteTable('gallery', {
   caption: text('caption'),
   link: text('link'),
   displayOrder: integer('display_order').default(0),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(
+    sql`(strftime('%s', 'now'))`,
+  ),
+})
+
+export const userReviews = sqliteTable('user_reviews', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+  content: text('content').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
     sql`(strftime('%s', 'now'))`,
   ),

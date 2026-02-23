@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback'
-import { Camera, Loader2 } from 'lucide-react'
+import { Camera, Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -41,6 +41,8 @@ export function StrydBoardPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const [newReview, setNewReview] = useState('')
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Expanded profile state to match Admin UI
@@ -75,6 +77,8 @@ export function StrydBoardPage() {
     recordWkg: '',
     strydUser: '',
     finalSurgeUser: '',
+    startDate: '',
+    reviews: [] as any[],
   })
 
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
@@ -130,6 +134,8 @@ export function StrydBoardPage() {
         recordWkg: data.recordWkg || '',
         strydUser: data.strydUser || '',
         finalSurgeUser: data.finalSurgeUser || '',
+        startDate: data.startDate || '',
+        reviews: data.reviews || [],
       })
 
       setCurrentUserId(data.id)
@@ -192,6 +198,39 @@ export function StrydBoardPage() {
       setSaveMessage('Error de conexión al subir imagen')
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleAddReview = async () => {
+    if (!newReview.trim() || !currentUserId) return
+
+    setIsSubmittingReview(true)
+    try {
+      const response = await fetch('/api/profile/reviews/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUserId,
+          content: newReview,
+        }),
+      })
+
+      if (response.ok) {
+        const data = (await response.json()) as { review: any }
+        setProfile((prev) => ({
+          ...prev,
+          reviews: [data.review, ...prev.reviews],
+        }))
+        setNewReview('')
+        setSaveMessage('Reseña agregada con éxito')
+        setTimeout(() => setSaveMessage(null), 3000)
+      } else {
+        setSaveMessage('Error al agregar la reseña')
+      }
+    } catch (error) {
+      setSaveMessage('Error de conexión')
+    } finally {
+      setIsSubmittingReview(false)
     }
   }
 
@@ -356,16 +395,35 @@ export function StrydBoardPage() {
                 Gestiona tu información de atleta
               </p>
             </div>
+            {/* Enhanced Feedback Notification */}
             {saveMessage && (
               <div
                 className={cn(
-                  'px-6 py-3 rounded-xl text-sm font-bold animate-in fade-in slide-in-from-top-2 shadow-lg',
-                  saveMessage.includes('Error')
-                    ? 'bg-red-500 text-white'
-                    : 'bg-green-500 text-white',
+                  'fixed top-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl animate-in slide-in-from-right-8 fade-in duration-300 border backdrop-blur-md',
+                  saveMessage.includes('éxito')
+                    ? 'bg-green-500/90 border-green-400 text-white'
+                    : 'bg-red-500/90 border-red-400 text-white',
                 )}
               >
-                {saveMessage}
+                {saveMessage.includes('éxito') ? (
+                  <CheckCircle2 className="w-6 h-6" />
+                ) : (
+                  <AlertCircle className="w-6 h-6" />
+                )}
+                <div className="flex flex-col">
+                  <span className="font-black text-sm uppercase tracking-wide">
+                    {saveMessage.includes('éxito') ? '¡Éxito!' : 'Error'}
+                  </span>
+                  <span className="text-sm font-medium opacity-90">
+                    {saveMessage}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setSaveMessage(null)}
+                  className="ml-4 p-1 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             )}
           </div>
@@ -679,6 +737,43 @@ export function StrydBoardPage() {
                       />
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 block">
+                      Miembro Desde
+                    </Label>
+                    <div className="flex gap-3 p-3 bg-gray-800/50 rounded-2xl border border-gray-800 focus-within:border-orange-500/50 transition-all">
+                      <div className="w-10 h-10 bg-gray-700 rounded-xl flex items-center justify-center text-orange-500 shadow-lg">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect
+                            x="3"
+                            y="4"
+                            width="18"
+                            height="18"
+                            rx="2"
+                            ry="2"
+                          />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                      </div>
+                      <Input
+                        type="date"
+                        value={profile.startDate}
+                        onChange={(e) =>
+                          setProfile({ ...profile, startDate: e.target.value })
+                        }
+                        className="bg-transparent border-none text-white focus:ring-0 p-0 h-10 w-full [color-scheme:dark]"
+                      />
+                    </div>
+                  </div>
                 </div>
               </Card>
 
@@ -694,6 +789,64 @@ export function StrydBoardPage() {
                   Tus datos se sincronizan con el panel de coach
                 </p>
               </div>
+
+              {/* Reviews Section */}
+              <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl shadow-xl mt-6">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <span className="p-1.5 bg-orange-500/10 rounded-lg font-black italic">
+                    💬
+                  </span>
+                  Mis Reseñas
+                </h3>
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <textarea
+                      placeholder="Escribe tu reseña aquí..."
+                      value={newReview}
+                      onChange={(e) => setNewReview(e.target.value)}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-2xl p-4 text-white focus:ring-2 focus:ring-orange-500 outline-none min-h-[120px] transition-all placeholder:text-gray-600"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleAddReview}
+                      disabled={isSubmittingReview || !newReview.trim()}
+                      className="w-full bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white border border-orange-500/20 font-bold rounded-xl py-4 transition-all"
+                    >
+                      {isSubmittingReview ? (
+                        <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                      ) : (
+                        '+ Agregar Reseña'
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    {profile.reviews.length === 0 ? (
+                      <p className="text-gray-600 text-center italic py-4">
+                        Aún no tienes reseñas.
+                      </p>
+                    ) : (
+                      profile.reviews.map((review, i) => (
+                        <div
+                          key={review.id || i}
+                          className="p-4 bg-gray-800/30 border border-gray-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300"
+                        >
+                          <p className="text-gray-300 text-sm leading-relaxed mb-3">
+                            "{review.content}"
+                          </p>
+                          <div className="flex justify-end italic">
+                            <span className="text-[10px] text-gray-600 uppercase font-black tracking-widest">
+                              {new Date(
+                                Number(review.createdAt) * 1000,
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </Card>
             </div>
           </form>
         </div>
