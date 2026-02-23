@@ -4,6 +4,32 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, Zap, TrendingUp, Target } from 'lucide-react'
 import heroBackground from '../assets/hero_background.png'
+import { getDb } from '@/db/client'
+import { userReviews, users } from '@/db/schema'
+import { eq, desc } from 'drizzle-orm'
+import { ReviewsCarousel } from '@/components/ReviewsCarousel'
+
+import { sql } from 'drizzle-orm'
+
+const db = getDb(Astro.locals.runtime.env.DB)
+const reviews = (
+  await db
+    .select({
+      id: userReviews.id,
+      content: userReviews.content,
+      createdAt: userReviews.createdAt,
+      authorName: users.fullName,
+      authorPhoto: users.photoUrl,
+    })
+    .from(userReviews)
+    .innerJoin(users, eq(userReviews.userId, users.id))
+    .orderBy(sql`RANDOM()`)
+    .limit(10)
+    .all()
+).map((r) => ({
+  ...r,
+  createdAt: r.createdAt ? r.createdAt.toISOString() : new Date().toISOString(),
+}))
 ---
 
 <Layout title="Stryd Panama | Entrena con Ciencia, Corre con Potencia">
@@ -146,6 +172,27 @@ import heroBackground from '../assets/hero_background.png'
         </div>
       </div>
     </section>
+
+    {/* Reviews Carousel Section */}
+    {
+      reviews.length > 0 && (
+        <section class="py-24 bg-black relative">
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] from-orange-500/10 to-transparent opacity-50" />
+          <div class="relative z-10 max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+              <h2 class="text-4xl md:text-5xl font-black mb-4 text-white uppercase tracking-tighter">
+                Lo que dicen nuestros{' '}
+                <span class="text-orange-500">Atletas</span>
+              </h2>
+              <p class="text-gray-500 font-bold uppercase tracking-[0.2em] text-sm">
+                Review real de atletas Stryd Panama
+              </p>
+            </div>
+            <ReviewsCarousel reviews={reviews} client:load />
+          </div>
+        </section>
+      )
+    }
 
     {/* CTA Section */}
     <section class="py-20 relative overflow-hidden">

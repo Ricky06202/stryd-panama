@@ -111,7 +111,7 @@ export function StrydBoardPage() {
         birthDate: data.birthDate || '',
         gender: data.gender || '',
         province: data.province || '',
-        photoUrl: data.photoUrl || '',
+        photoUrl: data.photoUrl || null,
 
         // Salud
         bloodType: data.bloodType || '',
