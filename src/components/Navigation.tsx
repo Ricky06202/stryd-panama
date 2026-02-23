@@ -14,10 +14,7 @@ export function Navigation() {
     { path: '/calendario', label: 'Calendario' },
     { path: '/carreras', label: 'Carreras' },
     { path: '/strydboard', label: 'StrydBoard' },
-    {
-      path: 'https://tshirt-stryd.ricardosanjurg.workers.dev',
-      label: 'Tienda',
-    },
+    { path: '/tienda', label: 'Tienda' },
     { path: '/blog', label: 'Blog' },
     { path: '/galeria', label: 'Galería' },
   ]
