@@ -66,7 +66,7 @@ export function CalendarPage() {
   }, [])
 
   if (!mounted) {
-    return <div className="min-h-screen bg-white" />
+    return <div className="min-h-screen bg-black" />
   }
   const getTypeBadgeColor = (type: Event['type']) => {
     switch (type) {
@@ -276,11 +276,11 @@ export function CalendarPage() {
   const EventCard = ({ event }: { event: Event }) => (
     <Card
       className={cn(
-        'border-l-4 hover:shadow-lg transition-shadow bg-white border-t border-r border-b border-gray-100',
+        'border-l-4 hover:shadow-lg transition-shadow bg-gray-900 border-t border-r border-b border-gray-800',
         getTypeBorderColor(event.type),
       )}
     >
-      <CardHeader className="pb-3 text-black">
+      <CardHeader className="pb-3 text-white">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
           <CardTitle className="text-xl font-bold">{event.title}</CardTitle>
           <div className="flex gap-2">
@@ -295,10 +295,10 @@ export function CalendarPage() {
             <Badge
               variant="outline"
               className={cn(
-                'w-fit border-gray-300 font-medium flex items-center gap-1',
+                'w-fit border-gray-700 font-medium flex items-center gap-1',
                 event.classification === 'team'
-                  ? 'bg-amber-50 text-amber-900 border-amber-200'
-                  : 'bg-green-50 text-green-900 border-green-200',
+                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                  : 'bg-green-500/10 text-green-500 border-green-500/20',
               )}
             >
               {event.classification === 'team' ? (
@@ -316,40 +316,40 @@ export function CalendarPage() {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <div className="flex items-center gap-2 text-gray-700">
+          <div className="flex items-center gap-2 text-gray-400">
             <Calendar className="h-4 w-4 text-orange-500" />
             <span className="capitalize text-sm">{formatDate(event.date)}</span>
           </div>
-          <div className="flex items-center gap-2 text-gray-700">
+          <div className="flex items-center gap-2 text-gray-400">
             <Clock className="h-4 w-4 text-orange-500" />
             <span className="text-sm">{event.time}</span>
           </div>
-          <div className="flex items-center gap-2 text-gray-700">
+          <div className="flex items-center gap-2 text-gray-400">
             <MapPin className="h-4 w-4 text-orange-500" />
             <span className="text-sm">{event.location}</span>
           </div>
-          <div className="flex items-center gap-2 text-gray-700">
-            <span className="font-semibold text-gray-900 text-sm">Costo:</span>
+          <div className="flex items-center gap-2 text-gray-400">
+            <span className="font-semibold text-white text-sm">Costo:</span>
             <span className="text-sm">{event.cost}</span>
           </div>
           {event.gpxUrl && (
             <a
               href={event.gpxUrl}
               download
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+              className="flex items-center gap-2 text-orange-500 hover:text-orange-600 hover:underline transition-colors"
             >
               <Download className="h-4 w-4" />
               <span className="text-sm font-medium">Descargar Ruta (GPX)</span>
             </a>
           )}
         </div>
-        <p className="text-gray-600 leading-relaxed">{event.description}</p>
+        <p className="text-gray-400 leading-relaxed">{event.description}</p>
       </CardContent>
     </Card>
   )
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-black min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-linear-to-r from-gray-900 to-gray-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -366,22 +366,22 @@ export function CalendarPage() {
       </section>
 
       {/* Main Content Area */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-black">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Left Column: Calendar Grid */}
             <div className="lg:col-span-5 space-y-6">
               {/* Month Navigation */}
-              <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-xs border border-gray-100">
+              <div className="flex items-center justify-between bg-gray-900 p-4 rounded-xl shadow-xs border border-gray-800">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handlePrevMonth}
-                  className="hover:bg-gray-100 text-gray-700"
+                  className="hover:bg-gray-800 text-gray-300"
                 >
                   <span className="text-xl">{'<'}</span>
                 </Button>
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-xl font-bold text-white">
                   {monthNames[currentDate.getMonth()]}{' '}
                   {currentDate.getFullYear()}
                 </h2>
@@ -389,14 +389,14 @@ export function CalendarPage() {
                   variant="ghost"
                   size="icon"
                   onClick={handleNextMonth}
-                  className="hover:bg-gray-100 text-gray-700"
+                  className="hover:bg-gray-800 text-gray-300"
                 >
                   <span className="text-xl">{'>'}</span>
                 </Button>
               </div>
 
               {/* Legend (Compact) */}
-              <div className="flex flex-wrap gap-2 justify-center text-xs text-gray-600 bg-gray-50 p-3 rounded-lg">
+              <div className="flex flex-wrap gap-2 justify-center text-xs text-gray-400 bg-gray-900 p-3 rounded-lg border border-gray-800">
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                   Entreno
@@ -422,12 +422,12 @@ export function CalendarPage() {
               </div>
 
               {/* Grid */}
-              <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
+              <div className="bg-gray-900 rounded-xl shadow-xs border border-gray-800 p-4">
                 <div className="grid grid-cols-7 mb-2 text-center">
                   {weekDays.map((day) => (
                     <div
                       key={day}
-                      className="text-xs font-semibold text-gray-400 py-2 uppercase tracking-wide"
+                      className="text-xs font-semibold text-gray-500 py-2 uppercase tracking-wide"
                     >
                       {day}
                     </div>
@@ -449,18 +449,18 @@ export function CalendarPage() {
                         className={cn(
                           'relative aspect-square flex flex-col items-center justify-start py-2 rounded-lg transition-all',
                           selected
-                            ? 'bg-orange-50 box-border border-2 border-orange-500 shadow-sm'
-                            : 'hover:bg-gray-50 border border-transparent',
-                          isCurrentDay && !selected && 'bg-gray-50 font-bold',
+                            ? 'bg-orange-500/10 box-border border-2 border-orange-500 shadow-sm'
+                            : 'hover:bg-gray-800 border border-transparent',
+                          isCurrentDay && !selected && 'bg-gray-800 font-bold',
                         )}
                       >
                         <span
                           className={cn(
                             'text-sm',
                             selected
-                              ? 'font-bold text-orange-700'
-                              : 'text-gray-700',
-                            isCurrentDay && !selected && 'text-orange-600',
+                              ? 'font-bold text-orange-500'
+                              : 'text-gray-400',
+                            isCurrentDay && !selected && 'text-orange-500',
                           )}
                         >
                           {day}
@@ -490,7 +490,7 @@ export function CalendarPage() {
             <div className="lg:col-span-7 space-y-8">
               {/* Selected Day Events */}
               <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <span className="w-2 h-8 bg-orange-500 rounded-full"></span>
                   Eventos del {formatDate(selectedDateStr)}
                 </h3>
@@ -501,8 +501,8 @@ export function CalendarPage() {
                       <EventCard key={event.id} event={event} />
                     ))
                   ) : (
-                    <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                      <p className="text-gray-500 italic">
+                    <div className="text-center py-8 bg-gray-900 rounded-xl border border-dashed border-gray-800">
+                      <p className="text-gray-400 italic">
                         No hay actividades programadas para este día.
                       </p>
                     </div>
@@ -512,7 +512,7 @@ export function CalendarPage() {
 
               {/* Future Events */}
               <div>
-                <h3 className="text-lg font-bold text-gray-500 mb-4 px-2 uppercase tracking-wide">
+                <h3 className="text-lg font-bold text-gray-400 mb-4 px-2 uppercase tracking-wide">
                   Próximamente
                 </h3>
 
@@ -533,13 +533,12 @@ export function CalendarPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gray-50 border-t">
+      <section className="py-16 bg-black border-t border-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-black">
+          <h2 className="text-3xl font-black mb-4 text-white uppercase tracking-tight">
             ¿Quieres Unirte a los Entrenos?
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-400 mb-8 font-medium">
             Todos los miembros del team tienen acceso completo al calendario y
             eventos exclusivos
           </p>

@@ -30,7 +30,7 @@ export function CoachingPage() {
     try {
       const response = await fetch('/api/admin/athletes')
       if (response.ok) {
-        const data = await response.json()
+        const data = (await response.json()) as any
         setAthletes(data.athletes)
       }
     } catch (error) {
@@ -46,7 +46,7 @@ export function CoachingPage() {
     try {
       const response = await fetch(`/api/strava/metrics?userId=${userId}`)
       if (response.ok) {
-        const data = await response.json()
+        const data = (await response.json()) as any
         setMetrics(data.metrics)
         setFtp(data.ftp)
       } else {
@@ -65,7 +65,7 @@ export function CoachingPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black text-white uppercase tracking-tight">
-            Panel de <span className="text-blue-500">Coaching</span>
+            Panel de <span className="text-orange-500">Coaching</span>
           </h2>
           <p className="text-gray-400">
             Administra el rendimiento de tus atletas
@@ -79,14 +79,14 @@ export function CoachingPage() {
           <Card className="bg-gray-900 border-gray-800 rounded-2xl overflow-hidden">
             <CardHeader className="border-b border-gray-800 pb-4">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-500" />
+                <Users className="w-4 h-4 text-orange-500" />
                 ATLETAS
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="p-8 flex justify-center">
-                  <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                  <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
                 </div>
               ) : athletes.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 text-sm italic">
@@ -100,7 +100,7 @@ export function CoachingPage() {
                       onClick={() => fetchAthleteMetrics(athlete.id)}
                       className={`w-full text-left p-4 transition-all hover:bg-gray-800 flex items-center justify-between ${
                         selectedAthleteId === athlete.id
-                          ? 'bg-gray-800 border-l-4 border-l-blue-500'
+                          ? 'bg-gray-800 border-l-4 border-l-orange-500'
                           : ''
                       }`}
                     >
@@ -145,7 +145,7 @@ export function CoachingPage() {
             </Card>
           ) : isLoadingMetrics ? (
             <Card className="bg-gray-900 border-gray-800 h-[600px] flex items-center justify-center rounded-3xl">
-              <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+              <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
             </Card>
           ) : metrics.length === 0 ? (
             <Card className="bg-gray-900 border-gray-800 h-[600px] flex items-center justify-center rounded-3xl p-12 text-center">
@@ -167,7 +167,7 @@ export function CoachingPage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-black text-white uppercase italic">
                   Rendimiento:{' '}
-                  <span className="text-blue-500">
+                  <span className="text-orange-500">
                     {athletes.find((a) => a.id === selectedAthleteId)?.fullName}
                   </span>
                 </h3>

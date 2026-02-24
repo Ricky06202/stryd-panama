@@ -50,8 +50,8 @@ export function JoinTeamPage() {
 
   if (isSubmitted) {
     return (
-      <div className="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-        <Card className="max-w-md w-full border-none shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500">
+      <div className="bg-black min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-md w-full border-gray-800 bg-gray-900 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500">
           <div className="bg-orange-500 p-8 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-4">
               <svg
@@ -72,10 +72,10 @@ export function JoinTeamPage() {
           </div>
           <CardContent className="p-8 text-center space-y-6">
             <div className="space-y-2">
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-white">
                 Tu solicitud está siendo procesada
               </p>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-400 leading-relaxed">
                 Estamos revisando tu información para darte la mejor bienvenida
                 al equipo. Una vez que tu solicitud sea aprobada, recibirás un
                 correo electrónico con todos los detalles para comenzar.
@@ -85,7 +85,7 @@ export function JoinTeamPage() {
               <Button
                 onClick={() => (window.location.href = '/')}
                 variant="outline"
-                className="border-orange-500 text-orange-600 hover:bg-orange-50 font-bold px-8 py-6 rounded-xl"
+                className="border-orange-500 text-orange-500 hover:bg-orange-500/10 font-bold px-8 py-6 rounded-xl"
               >
                 Volver al inicio
               </Button>
@@ -97,7 +97,7 @@ export function JoinTeamPage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-10 px-4">
+    <div className="bg-black min-h-screen py-10 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Header Section */}
         <div className="text-center space-y-4">
@@ -108,8 +108,10 @@ export function JoinTeamPage() {
               className="h-24 w-auto drop-shadow-lg"
             /> */}
           </div>
-          <h1 className="text-4xl font-black text-gray-900">Stryd Panamá</h1>
-          <p className="text-gray-600 leading-relaxed text-lg bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h1 className="text-4xl font-black text-white uppercase tracking-tight">
+            Stryd Panamá
+          </h1>
+          <p className="text-gray-300 leading-relaxed text-lg bg-gray-900 p-6 rounded-2xl shadow-sm border border-gray-800">
             Grupo de corredores que entrenan con Stryd Panamá. Muchas gracias
             por considerar mi asesoría para tu proceso de entrenamiento
             personalizado. Mi nombre es Ricardo Sanjur entrenador certificado de
@@ -124,11 +126,11 @@ export function JoinTeamPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+            <div className="bg-red-500/10 border-l-4 border-red-500 p-4 rounded-md">
               <div className="flex">
                 <div className="shrink-0">
                   <svg
-                    className="h-5 w-5 text-red-400"
+                    className="h-5 w-5 text-red-500"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -140,7 +142,7 @@ export function JoinTeamPage() {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-red-700">{error}</p>
+                  <p className="text-sm text-red-400">{error}</p>
                 </div>
               </div>
             </div>
@@ -159,7 +161,7 @@ export function JoinTeamPage() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="foto"
-                    className="text-base font-bold text-gray-900"
+                    className="text-base font-bold text-white"
                   >
                     Foto de Perfil
                   </Label>
@@ -168,7 +170,7 @@ export function JoinTeamPage() {
                     name="photo"
                     type="file"
                     accept="image/*"
-                    className="cursor-pointer"
+                    className="cursor-pointer bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
                 <FormField
@@ -178,17 +180,29 @@ export function JoinTeamPage() {
                   type="date"
                 />
                 <div className="space-y-3">
-                  <Label className="text-base font-bold text-gray-900">
+                  <Label className="text-xs font-bold text-white uppercase tracking-wider">
                     Genero
                   </Label>
                   <RadioGroup defaultValue="otro" name="gender">
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="masculino" id="masc" />
-                      <Label htmlFor="masc">Masculino</Label>
+                      <RadioGroupItem
+                        value="masculino"
+                        id="masc"
+                        className="border-orange-500"
+                      />
+                      <Label htmlFor="masc" className="text-gray-300">
+                        Masculino
+                      </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="femenino" id="fem" />
-                      <Label htmlFor="fem">Femenino</Label>
+                      <RadioGroupItem
+                        value="femenino"
+                        id="fem"
+                        className="border-orange-500"
+                      />
+                      <Label htmlFor="fem" className="text-gray-300">
+                        Femenino
+                      </Label>
                     </div>
                   </RadioGroup>
                 </div>
@@ -288,7 +302,7 @@ export function JoinTeamPage() {
             <Section title="Objetivos">
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <Label className="text-base font-bold text-gray-900">
+                  <Label className="text-xs font-bold text-white uppercase tracking-wider">
                     ¿Para qué entrenas?
                   </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
@@ -301,10 +315,18 @@ export function JoinTeamPage() {
                     ].map((obj) => (
                       <div
                         key={obj}
-                        className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center space-x-2 p-3 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors"
                       >
-                        <Checkbox id={obj} name="goals" value={obj} />
-                        <Label htmlFor={obj} className="cursor-pointer">
+                        <Checkbox
+                          id={obj}
+                          name="goals"
+                          value={obj}
+                          className="border-orange-500"
+                        />
+                        <Label
+                          htmlFor={obj}
+                          className="cursor-pointer text-gray-300"
+                        >
                           {obj}
                         </Label>
                       </div>
@@ -332,7 +354,7 @@ export function JoinTeamPage() {
             {/* Section 6: Plan de Entreno */}
             <Section title="Plan de Entreno">
               <div className="space-y-4">
-                <Label className="text-base font-bold text-gray-900">
+                <Label className="text-xs font-bold text-white uppercase tracking-wider">
                   ¿Cuántos días a la semana te gustaría entrenar?
                 </Label>
                 <RadioGroup
@@ -347,12 +369,16 @@ export function JoinTeamPage() {
                   ].map((opt) => (
                     <div
                       key={opt.v}
-                      className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-orange-50 transition-colors cursor-pointer"
+                      className="flex items-center space-x-2 p-3 border border-gray-700 rounded-lg hover:bg-orange-500/10 hover:border-orange-500 transition-colors cursor-pointer"
                     >
-                      <RadioGroupItem value={opt.v} id={`plan_${opt.v}`} />
+                      <RadioGroupItem
+                        value={opt.v}
+                        id={`plan_${opt.v}`}
+                        className="border-orange-500"
+                      />
                       <Label
                         htmlFor={`plan_${opt.v}`}
-                        className="flex-1 cursor-pointer font-medium"
+                        className="flex-1 cursor-pointer font-medium text-gray-300"
                       >
                         {opt.l}
                       </Label>
@@ -367,54 +393,90 @@ export function JoinTeamPage() {
               <div className="space-y-6">
                 <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
                   <div className="space-y-3">
-                    <Label className="text-base font-bold text-gray-900">
+                    <Label className="text-xs font-bold text-white uppercase tracking-wider">
                       ¿Ha entrenado antes con Stryd?
                     </Label>
                     <RadioGroup className="flex space-x-4">
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="si" id="stryd_si" />
-                        <Label htmlFor="stryd_si">Sí</Label>
+                        <RadioGroupItem
+                          value="si"
+                          id="stryd_si"
+                          className="border-orange-500"
+                        />
+                        <Label htmlFor="stryd_si" className="text-gray-300">
+                          Sí
+                        </Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="stryd_no" />
-                        <Label htmlFor="stryd_no">No</Label>
+                        <RadioGroupItem
+                          value="no"
+                          id="stryd_no"
+                          className="border-orange-500"
+                        />
+                        <Label htmlFor="stryd_no" className="text-gray-300">
+                          No
+                        </Label>
                       </div>
                     </RadioGroup>
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-base font-bold text-gray-900">
+                    <Label className="text-xs font-bold text-white uppercase tracking-wider">
                       ¿Ha realizado entrenamiento estructurado?
                     </Label>
                     <RadioGroup className="flex space-x-4">
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="si" id="est_si" />
-                        <Label htmlFor="est_si">Sí</Label>
+                        <RadioGroupItem
+                          value="si"
+                          id="est_si"
+                          className="border-orange-500"
+                        />
+                        <Label htmlFor="est_si" className="text-gray-300">
+                          Sí
+                        </Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="est_no" />
-                        <Label htmlFor="est_no">No</Label>
+                        <RadioGroupItem
+                          value="no"
+                          id="est_no"
+                          className="border-orange-500"
+                        />
+                        <Label htmlFor="est_no" className="text-gray-300">
+                          No
+                        </Label>
                       </div>
                     </RadioGroup>
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-base font-bold text-gray-900">
+                    <Label className="text-xs font-bold text-white uppercase tracking-wider">
                       ¿Realiza actualmente entrenamiento de fuerza? (pesas o con
                       peso corporal)
                     </Label>
                     <RadioGroup className="flex space-x-4">
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="si" id="fuerza_si" />
-                        <Label htmlFor="fuerza_si">Sí</Label>
+                        <RadioGroupItem
+                          value="si"
+                          id="fuerza_si"
+                          className="border-orange-500"
+                        />
+                        <Label htmlFor="fuerza_si" className="text-gray-300">
+                          Sí
+                        </Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="fuerza_no" />
-                        <Label htmlFor="fuerza_no">No</Label>
+                        <RadioGroupItem
+                          value="no"
+                          id="fuerza_no"
+                          className="border-orange-500"
+                        />
+                        <Label htmlFor="fuerza_no" className="text-gray-300">
+                          No
+                        </Label>
                       </div>
                     </RadioGroup>
                   </div>
 
                   <div className="space-y-3">
-                    <Label className="text-base font-bold text-gray-900">
+                    <Label className="text-xs font-bold text-white uppercase tracking-wider">
                       Nivel de actividad (últimos 4 meses)
                     </Label>
                     <RadioGroup className="space-y-2">
@@ -426,12 +488,16 @@ export function JoinTeamPage() {
                       ].map((opt) => (
                         <div
                           key={opt.v}
-                          className="flex items-center space-x-2 p-2 border rounded-md hover:bg-orange-50 transition-colors"
+                          className="flex items-center space-x-2 p-2 border border-gray-700 rounded-md hover:bg-orange-500/10 transition-colors"
                         >
-                          <RadioGroupItem value={opt.v} id={opt.v} />
+                          <RadioGroupItem
+                            value={opt.v}
+                            id={opt.v}
+                            className="border-orange-500"
+                          />
                           <Label
                             htmlFor={opt.v}
-                            className="flex-1 cursor-pointer"
+                            className="flex-1 cursor-pointer text-gray-300"
                           >
                             {opt.l}
                           </Label>
@@ -442,7 +508,7 @@ export function JoinTeamPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-base font-bold text-gray-900">
+                  <Label className="text-xs font-bold text-white uppercase tracking-wider">
                     Marca de Reloj
                   </Label>
                   <RadioGroup className="grid grid-cols-2 gap-2">
@@ -457,13 +523,16 @@ export function JoinTeamPage() {
                     ].map((marca) => (
                       <div
                         key={marca}
-                        className="flex items-center space-x-2 p-2 border rounded-md"
+                        className="flex items-center space-x-2 p-2 border border-gray-700 rounded-md"
                       >
                         <RadioGroupItem
                           value={marca.toLowerCase()}
                           id={marca}
+                          className="border-orange-500"
                         />
-                        <Label htmlFor={marca}>{marca}</Label>
+                        <Label htmlFor={marca} className="text-gray-300">
+                          {marca}
+                        </Label>
                       </div>
                     ))}
                   </RadioGroup>
@@ -471,7 +540,7 @@ export function JoinTeamPage() {
 
                 <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
                   <div className="space-y-3">
-                    <Label className="text-base font-bold text-gray-900">
+                    <Label className="text-xs font-bold text-white uppercase tracking-wider">
                       ¿Qué distancia(s) le llaman la atención?
                     </Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -484,17 +553,19 @@ export function JoinTeamPage() {
                       ].map((dist) => (
                         <div
                           key={dist}
-                          className="flex items-center space-x-2 p-2 border rounded-md"
+                          className="flex items-center space-x-2 p-2 border border-gray-700 rounded-md"
                         >
-                          <Checkbox id={dist} />
-                          <Label htmlFor={dist}>{dist}</Label>
+                          <Checkbox id={dist} className="border-orange-500" />
+                          <Label htmlFor={dist} className="text-gray-300">
+                            {dist}
+                          </Label>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <Label className="text-base font-bold text-gray-900">
+                    <Label className="text-xs font-bold text-white uppercase tracking-wider">
                       Nivel de Actividad en el Trabajo
                     </Label>
                     <RadioGroup className="space-y-2">
@@ -508,12 +579,16 @@ export function JoinTeamPage() {
                       ].map((opt) => (
                         <div
                           key={opt.v}
-                          className="flex items-center space-x-2 p-2 border rounded-md"
+                          className="flex items-center space-x-2 p-2 border border-gray-700 rounded-md hover:bg-orange-500/10 transition-colors"
                         >
-                          <RadioGroupItem value={opt.v} id={`work_${opt.v}`} />
+                          <RadioGroupItem
+                            value={opt.v}
+                            id={`work_${opt.v}`}
+                            className="border-orange-500"
+                          />
                           <Label
                             htmlFor={`work_${opt.v}`}
-                            className="flex-1 cursor-pointer"
+                            className="flex-1 cursor-pointer text-gray-300"
                           >
                             {opt.l}
                           </Label>
@@ -575,13 +650,13 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <Card className="border-none shadow-lg overflow-hidden">
+    <Card className="border-gray-800 bg-gray-900 shadow-lg overflow-hidden">
       <div className="bg-orange-600 px-6 py-4">
         <h2 className="text-xl font-bold text-white uppercase tracking-wider">
           {title}
         </h2>
       </div>
-      <CardContent className="p-8 bg-white">{children}</CardContent>
+      <CardContent className="p-8 bg-gray-900">{children}</CardContent>
     </Card>
   )
 }
@@ -598,22 +673,25 @@ function FormField({
   name?: string
 }) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id} className="text-base font-bold text-gray-900">
+    <div className="space-y-2 text-white">
+      <Label
+        htmlFor={id}
+        className="text-xs font-bold text-white uppercase tracking-wider"
+      >
         {label}
       </Label>
       {type === 'textarea' ? (
         <Textarea
           id={id}
           name={name || id}
-          className="focus-visible:ring-orange-500 min-h-[100px]"
+          className="bg-gray-800 border-gray-700 text-white focus-visible:ring-orange-500 min-h-[100px]"
         />
       ) : (
         <Input
           id={id}
           name={name || id}
           type={type}
-          className="focus-visible:ring-orange-500 h-11"
+          className="bg-gray-800 border-gray-700 text-white focus-visible:ring-orange-500 h-11"
         />
       )}
     </div>

@@ -12,6 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
+// Images in the public folder are referenced directly via their URL path
+const sanSilvestre2025 = '/carreras/San Silvestre 2025.jpg'
+const sanSilvestre2026 = '/carreras/San Silvestre 2026.jpg'
+
 interface Race {
   id: string
   name: string
@@ -35,13 +39,13 @@ const races: Race[] = [
     name: 'San Silvestre David 2026',
     date: '31 de diciembre, 2026',
     location: 'David, Chiriquí',
-    distances: ['5K', '10K'],
+    distances: ['5K'],
     description:
       '¡Despide el año corriendo! Únete a la tradicional carrera San Silvestre, donde celebramos el cierre del año con energía, comunidad y mucho running. Una experiencia única que combina deporte, diversión y compañerismo.',
-    image: 'running celebration night',
+    image: sanSilvestre2026,
     status: 'upcoming',
     participants: 0,
-    maxParticipants: 500,
+    maxParticipants: 100,
     registrationFee: '$15 - $25',
     highlights: [
       'Medalla finisher para todos los participantes',
@@ -59,14 +63,14 @@ const races: Race[] = [
     name: 'San Silvestre David 2025',
     date: '31 de diciembre, 2025',
     location: 'David, Chiriquí',
-    distances: ['5K', '10K'],
+    distances: ['5K'],
     description:
-      'Primera edición exitosa de la San Silvestre en David. Más de 300 corredores disfrutaron de una noche mágica cerrando el año con energía positiva.',
-    image: 'running finish line celebration',
+      'Cuarta edición exitosa de la San Silvestre en David. Más de 75 corredores disfrutaron de una mañana mágica cerrando el año con energía positiva.',
+    image: sanSilvestre2025,
     status: 'completed',
-    participants: 320,
+    participants: 75,
     highlights: [
-      'Más de 300 corredores participaron',
+      'Más de 75 corredores participaron',
       'Ambiente festivo y familiar',
       'Recorrido por las principales calles de David',
       'Gran aceptación de la comunidad',
@@ -245,15 +249,30 @@ function RaceCard({ race }: { race: Race }) {
     <Card className="bg-gray-800/50 border-gray-700 overflow-hidden hover:border-orange-500 transition-all duration-300">
       <div className="grid md:grid-cols-3 gap-0">
         {/* Image Section */}
-        <div className="md:col-span-1 relative h-64 md:h-auto bg-linear-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
-          <Trophy className="w-24 h-24 text-orange-500/30" />
+        <div className="md:col-span-1 relative h-64 md:h-auto bg-gray-900 overflow-hidden flex items-center justify-center">
+          {/* Trophy as background/fallback */}
+          <div className="absolute inset-0 bg-linear-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
+            <Trophy className="w-24 h-24 text-orange-500/30" />
+          </div>
+
+          {race.image && (
+            <img
+              src={race.image}
+              alt={race.name}
+              className="w-full h-full object-cover relative z-10"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
+          )}
+
           {race.status === 'registration-open' && (
-            <Badge className="absolute top-4 right-4 bg-green-500 text-white border-none">
+            <Badge className="absolute top-4 right-4 bg-green-500 text-white border-none z-20">
               Inscripciones Abiertas
             </Badge>
           )}
           {isCompleted && (
-            <Badge className="absolute top-4 right-4 bg-gray-600 text-white border-none">
+            <Badge className="absolute top-4 right-4 bg-gray-600 text-white border-none z-20">
               Completada
             </Badge>
           )}

@@ -17,6 +17,7 @@ export function Navigation() {
     { path: '/tienda', label: 'Tienda' },
     { path: '/blog', label: 'Blog' },
     { path: '/galeria', label: 'Galería' },
+    { path: '/contacto', label: 'Contacto' },
   ]
 
   // In Astro, we can't use useLocation() in the same way in a client component easily without passing it.
@@ -33,21 +34,23 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.path}
-                href={link.path}
-                target={link.path.startsWith('http') ? '_blank' : undefined}
-                rel={
-                  link.path.startsWith('http')
-                    ? 'noopener noreferrer'
-                    : undefined
-                }
-                className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:bg-gray-800 hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks
+              .filter((l) => l.label !== 'Contacto')
+              .map((link) => (
+                <a
+                  key={link.path}
+                  href={link.path}
+                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:bg-gray-800 hover:text-white"
+                >
+                  {link.label}
+                </a>
+              ))}
+            <a
+              href="/contacto"
+              className="ml-4 px-4 py-2 rounded-lg text-sm font-bold bg-orange-500 text-white hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+            >
+              Contacto
+            </a>
           </div>
 
           {/* Mobile menu button */}

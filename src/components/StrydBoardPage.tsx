@@ -385,9 +385,9 @@ export function StrydBoardPage() {
 
           <button
             onClick={() => setView('performance')}
-            className="group relative bg-gray-900 border border-gray-800 p-12 rounded-3xl text-center transition-all hover:bg-gray-800 hover:border-blue-500/50 hover:scale-[1.02]"
+            className="group relative bg-gray-900 border border-gray-800 p-12 rounded-3xl text-center transition-all hover:bg-gray-800 hover:border-orange-500/50 hover:scale-[1.02]"
           >
-            <div className="w-24 h-24 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:bg-blue-500 group-hover:text-white text-blue-500 transition-all">
+            <div className="w-24 h-24 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:bg-orange-500 group-hover:text-white text-orange-500 transition-all">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-12 w-12"
@@ -404,7 +404,7 @@ export function StrydBoardPage() {
               </svg>
             </div>
             <h2 className="text-3xl font-black mb-4">
-              MI <span className="text-blue-500">PERFORMANCE</span>
+              MI <span className="text-orange-500">PERFORMANCE</span>
             </h2>
             <p className="text-gray-400 font-medium">
               Analiza tu potencia, fatiga y progreso semanal.

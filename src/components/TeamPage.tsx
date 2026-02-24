@@ -39,7 +39,7 @@ export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
       : athletes.filter((athlete) => athlete.category === selectedFilter)
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-black min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-linear-to-r from-orange-500 to-orange-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,7 +53,7 @@ export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
       </section>
 
       {/* Filters */}
-      <section className="py-8 bg-white/80 top-[80px] z-50 border-b border-gray-100 backdrop-blur-md">
+      <section className="py-8 bg-black/80 sticky top-[80px] z-50 border-b border-gray-800 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-2 justify-center">
             {filters.map((filter) => (
@@ -66,7 +66,7 @@ export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
                 className={
                   selectedFilter === filter.value
                     ? 'bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 border-none shadow-md'
-                    : 'text-gray-600 border-gray-300 hover:bg-white'
+                    : 'text-gray-400 border-gray-800 hover:bg-gray-800 hover:text-white transition-colors'
                 }
               >
                 {filter.label}
@@ -77,13 +77,13 @@ export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
       </section>
 
       {/* Athletes Grid */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredAthletes.map((athlete) => (
               <Card
                 key={athlete.id}
-                className="border-none shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-white overflow-hidden group"
+                className="border-gray-800 shadow-lg hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-2 bg-gray-900 overflow-hidden group"
               >
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden">
@@ -97,21 +97,21 @@ export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
                     </div>
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-orange-500 transition-colors">
+                    <h3 className="text-xl font-bold text-white mb-4 group-hover:text-orange-500 transition-colors">
                       {athlete.name}
                     </h3>
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
+                      <div className="flex items-center gap-3 text-sm text-gray-400">
                         <Trophy className="h-4 w-4 text-orange-500 shrink-0" />
                         <span className="font-medium">
                           {athlete.achievement}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
+                      <div className="flex items-center gap-3 text-sm text-gray-400">
                         <Target className="h-4 w-4 text-orange-500 shrink-0" />
                         <span>
                           CP Actual:{' '}
-                          <span className="font-bold text-gray-900">
+                          <span className="font-bold text-white">
                             {athlete.cp}
                           </span>
                         </span>
@@ -124,11 +124,11 @@ export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
           </div>
 
           {filteredAthletes.length === 0 && (
-            <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-              <Trophy className="h-16 w-16 text-gray-300 mx-auto mb-4 opacity-50" />
-              <p className="text-gray-500 text-xl font-medium">
+            <div className="text-center py-20 bg-gray-900 rounded-2xl border-2 border-dashed border-gray-800">
+              <Trophy className="h-16 w-16 text-gray-700 mx-auto mb-4 opacity-50" />
+              <p className="text-gray-400 text-xl font-medium">
                 No se encontraron atletas en la categoría{' '}
-                <span className="font-bold text-black">"{selectedFilter}"</span>
+                <span className="font-bold text-white">"{selectedFilter}"</span>
                 .
               </p>
             </div>
@@ -137,12 +137,12 @@ export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
       </section>
 
       {/* Join CTA */}
-      <section className="py-20 bg-linear-to-b from-gray-50 to-white">
+      <section className="py-20 bg-linear-to-b from-gray-900 to-black border-t border-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-black mb-6 text-black">
+          <h2 className="text-4xl font-black mb-6 text-white uppercase tracking-tight">
             ¿Quieres Ser Parte del Team?
           </h2>
-          <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+          <p className="text-xl text-gray-400 mb-10 leading-relaxed font-medium">
             Únete a nuestra comunidad de corredores que entrenan con ciencia,
             datos precisos y una pasión compartida por el running.
           </p>
@@ -159,7 +159,7 @@ export function TeamPage({ initialAthletes = [] }: TeamPageProps) {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-gray-900 border-2 text-black hover:bg-gray-900 hover:text-white font-bold px-10 py-7 text-lg transition-all"
+                className="border-orange-500 border-2 text-white hover:bg-orange-500 hover:text-white font-bold px-10 py-7 text-lg transition-all"
               >
                 Ver Calendario de Entrenos
               </Button>

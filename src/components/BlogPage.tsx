@@ -84,7 +84,7 @@ export function BlogPage() {
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-black min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-linear-to-r from-gray-900 to-gray-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -98,7 +98,7 @@ export function BlogPage() {
       </section>
 
       {/* Category Filter */}
-      <section className="py-8 bg-gray-50 sticky top-20 z-40 border-b">
+      <section className="py-8 bg-black/80 sticky top-20 z-40 border-b border-gray-800 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-2 justify-center">
             {categories.map((category) => (
@@ -110,8 +110,8 @@ export function BlogPage() {
                 }
                 className={
                   selectedCategory === category.value
-                    ? `${category.color} hover:opacity-90 text-white`
-                    : 'text-gray-700 hover:bg-gray-200'
+                    ? `${category.color} hover:opacity-90 text-white font-bold border-none`
+                    : 'text-gray-400 border-gray-800 hover:bg-gray-800 hover:text-white transition-colors'
                 }
               >
                 {category.label}
@@ -133,7 +133,7 @@ export function BlogPage() {
               {filteredPosts.map((post) => (
                 <Card
                   key={post.id}
-                  className="border-none shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer flex flex-col h-full"
+                  className="border-gray-800 shadow-lg hover:shadow-orange-500/10 transition-all hover:-translate-y-1 cursor-pointer flex flex-col h-full bg-gray-900 overflow-hidden"
                 >
                   <CardContent className="p-0 flex flex-col h-full">
                     <div className="relative">
@@ -151,11 +151,11 @@ export function BlogPage() {
                         {getCategoryLabel(post.category)}
                       </Badge>
                     </div>
-                    <div className="p-6 text-black flex flex-col flex-1">
-                      <h3 className="text-xl font-bold mb-3 line-clamp-2">
+                    <div className="p-6 text-white flex flex-col flex-1">
+                      <h3 className="text-xl font-bold mb-3 line-clamp-2 text-white group-hover:text-orange-500 transition-colors">
                         {post.title}
                       </h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+                      <p className="text-gray-400 text-sm mb-4 line-clamp-3 flex-1">
                         {post.content}
                       </p>
 
@@ -171,7 +171,7 @@ export function BlogPage() {
                         </a>
                       )}
 
-                      <div className="flex items-center justify-between text-sm text-gray-500 mt-auto pt-4 border-t">
+                      <div className="flex items-center justify-between text-sm text-gray-500 mt-auto pt-4 border-t border-gray-800">
                         <div className="flex items-center gap-1">
                           <User className="h-4 w-4" />
                           <span>{post.author || 'Stryd Panama'}</span>
@@ -197,11 +197,11 @@ export function BlogPage() {
             </div>
           )}
 
-          {!loading && filteredPosts.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No hay artículos todavía.</p>
-            </div>
-          )}
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-lg italic">
+              No hay artículos todavía.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -219,11 +219,11 @@ export function BlogPage() {
             <input
               type="email"
               placeholder="tu@email.com"
-              className="flex-1 px-4 py-3 rounded-lg text-gray-900 border-none outline-none focus:ring-2 focus:ring-black"
+              className="flex-1 px-4 py-3 rounded-lg text-white bg-white/10 border border-white/20 outline-none focus:ring-2 focus:ring-black placeholder:text-white/50"
             />
             <Button
               size="lg"
-              className="bg-black hover:bg-gray-900 text-white font-bold"
+              className="bg-black hover:bg-gray-900 text-white font-bold px-8 shadow-xl"
             >
               Suscribirse
             </Button>
