@@ -272,7 +272,7 @@ export function ContactPage() {
                       Ubicación
                     </p>
                     <p className="text-white text-xl font-bold">
-                      Panamá City, Panamá
+                      David, Chiriquí, Panamá
                     </p>
                   </div>
                 </div>
