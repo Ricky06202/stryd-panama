@@ -6,12 +6,15 @@ import { eq } from 'drizzle-orm'
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const db = getDb(locals.runtime.env.DB)
-    const { requestId, action } = await request.json()
-
+    const body = (await request.json()) as any
+    const { requestId, action } = body
     if (!requestId || !['approve', 'reject'].includes(action)) {
-      return new Response(JSON.stringify({ error: 'Faltan datos requeridos' }), {
-        status: 400,
-      })
+      return new Response(
+        JSON.stringify({ error: 'Faltan datos requeridos' }),
+        {
+          status: 400,
+        },
+      )
     }
 
     const reqs = await db
@@ -24,9 +27,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const req = reqs[0]
 
     if (!req) {
-      return new Response(JSON.stringify({ error: 'Solicitud no encontrada' }), {
-        status: 404,
-      })
+      return new Response(
+        JSON.stringify({ error: 'Solicitud no encontrada' }),
+        {
+          status: 404,
+        },
+      )
     }
 
     if (action === 'approve') {
@@ -44,23 +50,31 @@ export const POST: APIRoute = async ({ request, locals }) => {
         .where(eq(membershipRequests.id, requestId))
         .run()
     } else {
-      // Rechazar solicitud
+      // Borrar usuario y solicitud si es rechazado
+      // Primero borramos la solicitud (hija) para evitar errores de FK si aplica
       await db
-        .update(membershipRequests)
-        .set({ status: 'rejected' })
+        .delete(membershipRequests)
         .where(eq(membershipRequests.id, requestId))
         .run()
+
+      // Luego el usuario
+      await db.delete(users).where(eq(users.id, req.userId)).run()
     }
 
     return new Response(
-      JSON.stringify({ message: `Solicitud ${action === 'approve' ? 'aprobada' : 'rechazada'} con éxito` }),
-      { status: 200 }
+      JSON.stringify({
+        message: `Solicitud ${action === 'approve' ? 'aprobada' : 'rechazada'} con éxito`,
+      }),
+      { status: 200 },
     )
   } catch (error) {
     console.error('Error in admin/requests:', error)
-    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
-      status: 500,
-    })
+    return new Response(
+      JSON.stringify({ error: 'Error interno del servidor' }),
+      {
+        status: 500,
+      },
+    )
   }
 }
 
@@ -76,7 +90,7 @@ export const GET: APIRoute = async ({ locals }) => {
           fullName: users.fullName,
           email: users.email,
           idCard: users.idCard,
-        }
+        },
       })
       .from(membershipRequests)
       .innerJoin(users, eq(membershipRequests.userId, users.id))
@@ -85,8 +99,11 @@ export const GET: APIRoute = async ({ locals }) => {
 
     return new Response(JSON.stringify(requests), { status: 200 })
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Error al obtener solicitudes' }), {
-      status: 500,
-    })
+    return new Response(
+      JSON.stringify({ error: 'Error al obtener solicitudes' }),
+      {
+        status: 500,
+      },
+    )
   }
 }
