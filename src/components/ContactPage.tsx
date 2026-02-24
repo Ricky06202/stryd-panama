@@ -38,35 +38,31 @@ export function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setStatus('idle')
 
-    // Construct the mailto link
-    const subject = encodeURIComponent(
-      `${formData.titulo || 'Contacto desde Web'} - ${formData.nombre}`,
-    )
-    const body = encodeURIComponent(
-      `Nombre: ${formData.nombre}\n` +
-        `Email: ${formData.email}\n` +
-        `Teléfono: ${formData.telefono}\n\n` +
-        `Mensaje:\n${formData.descripcion}`,
-    )
-
-    const mailtoUrl = `mailto:gerencia@ricardosanjur.com?subject=${subject}&body=${body}`
-
-    // We'll simulate a success and then open the mailto link
-    // This is because client-side email sending without a backend is limited
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      window.location.href = mailtoUrl
-      setStatus('success')
-      setFormData({
-        nombre: '',
-        email: '',
-        telefono: '',
-        titulo: '',
-        descripcion: '',
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       })
+
+      if (response.ok) {
+        setStatus('success')
+        setFormData({
+          nombre: '',
+          email: '',
+          telefono: '',
+          titulo: '',
+          descripcion: '',
+        })
+      } else {
+        setStatus('error')
+      }
     } catch (error) {
+      console.error('Error sending message:', error)
       setStatus('error')
     } finally {
       setIsLoading(false)
@@ -96,11 +92,11 @@ export function ContactPage() {
                     <CheckCircle2 className="w-10 h-10 text-green-500" />
                   </div>
                   <h3 className="text-2xl font-black text-white mb-4">
-                    ¡MENSAJE LISTO!
+                    ¡MENSAJE ENVIADO!
                   </h3>
                   <p className="text-gray-400 mb-8">
-                    Tu gestor de correo se ha abierto con los detalles. Por
-                    favor, haz clic en "Enviar" en tu aplicación de correo.
+                    Tu mensaje ha sido recibido exitosamente. Nos pondremos en
+                    contacto contigo lo antes posible.
                   </p>
                   <Button
                     onClick={() => setStatus('idle')}
