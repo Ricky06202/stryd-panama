@@ -20,6 +20,8 @@ import {
   AreaChart,
   Area,
 } from 'recharts'
+import { PerformanceChart } from '@/components/PerformanceChart'
+import { useEffect } from 'react'
 
 const powerData = [
   { day: 'Lun', power: 245, rpe: 6 },
@@ -79,7 +81,12 @@ export function StrydBoardPage() {
     finalSurgeUser: '',
     startDate: '',
     reviews: [] as any[],
+    stravaConnected: false,
   })
+
+  const [metrics, setMetrics] = useState<any[]>([])
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(false)
+  const [ftp, setFtp] = useState<number | undefined>(undefined)
 
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const [loginError, setLoginError] = useState<string | null>(null)
@@ -136,6 +143,7 @@ export function StrydBoardPage() {
         finalSurgeUser: data.finalSurgeUser || '',
         startDate: data.startDate || '',
         reviews: data.reviews || [],
+        stravaConnected: !!data.stravaRefreshToken,
       })
 
       setCurrentUserId(data.id)
@@ -232,6 +240,39 @@ export function StrydBoardPage() {
     } finally {
       setIsSubmittingReview(false)
     }
+  }
+
+  const fetchMetrics = async () => {
+    if (!currentUserId) return
+    setIsLoadingMetrics(true)
+    try {
+      const response = await fetch(
+        `/api/strava/metrics?userId=${currentUserId}`,
+      )
+      if (response.ok) {
+        const data = (await response.json()) as any
+        setMetrics(data.metrics)
+        setFtp(data.ftp)
+      }
+    } catch (error) {
+      console.error('Error fetching metrics:', error)
+    } finally {
+      setIsLoadingMetrics(false)
+    }
+  }
+
+  useEffect(() => {
+    if (view === 'performance' && currentUserId && profile.stravaConnected) {
+      fetchMetrics()
+    }
+  }, [view, currentUserId, profile.stravaConnected])
+
+  const handleStravaConnect = () => {
+    const clientId = '197123' // From .env
+    const redirectUri = `${window.location.origin}/api/strava/auth`
+    const scope = 'activity:read_all'
+    const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${currentUserId}`
+    window.location.href = authUrl
   }
 
   if (!isLoggedIn) {
@@ -870,264 +911,280 @@ export function StrydBoardPage() {
               MI <span className="text-blue-500">PERFORMANCE</span>
             </h1>
             <p className="text-gray-400 font-medium">
-              Ricardo Sanjur • Análisis de entrenamiento
+              {profile.fullName} • Análisis de entrenamiento
             </p>
           </div>
           <div className="flex gap-4">
+            {profile.stravaConnected && (
+              <Button
+                variant="outline"
+                className="border-gray-700 text-gray-300 hover:bg-gray-800 rounded-xl px-4"
+                disabled={isLoadingMetrics}
+                onClick={fetchMetrics}
+              >
+                {isLoadingMetrics ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  'Sincronizar'
+                )}
+              </Button>
+            )}
             <Button
               variant="outline"
               className="border-gray-700 text-gray-300 hover:bg-gray-800 rounded-xl px-6"
             >
               Exportar CSV
             </Button>
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl px-6 shadow-lg shadow-blue-500/20">
-              Nuevo Entrenamiento
-            </Button>
           </div>
         </header>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-          {[
-            {
-              label: 'Critical Power',
-              value: '285 W',
-              delta: '+5',
-              color: 'text-orange-500',
-            },
-            {
-              label: 'RSS (7d)',
-              value: '450',
-              delta: '-12',
-              color: 'text-blue-400',
-            },
-            {
-              label: 'Leg Spring Stiffness',
-              value: '9.2 kN/m',
-              delta: '+0.2',
-              color: 'text-purple-400',
-            },
-            {
-              label: 'Efficiency Index',
-              value: '1.45',
-              delta: '+0.03',
-              color: 'text-green-400',
-            },
-          ].map((stat, i) => (
-            <Card
-              key={i}
-              className="bg-gray-900 border-gray-800 p-6 rounded-2xl border-l-4 border-l-blue-500"
-            >
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
-                {stat.label}
-              </p>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-black text-white">
-                  {stat.value}
-                </span>
-                <span
-                  className={cn(
-                    'text-xs font-bold',
-                    stat.delta.startsWith('+')
-                      ? 'text-green-500'
-                      : 'text-red-500',
-                  )}
+        {!profile.stravaConnected ? (
+          <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-orange-500 blur-3xl opacity-20 animate-pulse"></div>
+              <div className="relative w-24 h-24 bg-gray-900 border border-gray-800 rounded-3xl flex items-center justify-center shadow-2xl">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-12 h-12 fill-orange-500"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  {stat.delta}
-                </span>
+                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.67h4.151L10.377 0 4.85 11.084h4.15z" />
+                </svg>
               </div>
-            </Card>
-          ))}
-        </div>
+            </div>
 
-        <Tabs defaultValue="power" className="space-y-8">
-          <TabsList className="bg-gray-900 border border-gray-800 p-1.5 rounded-2xl w-full max-w-md">
-            <TabsTrigger
-              value="power"
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-xl text-gray-400 font-bold transition-all"
+            <h2 className="text-3xl font-black mb-4 uppercase tracking-tight">
+              Análisis de <span className="text-orange-500">Rendimiento</span>
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto mb-10 leading-relaxed font-medium">
+              Para desbloquear tus métricas avanzadas de entrenamiento (CTL,
+              ATL, TSB), necesitamos conectarnos con tu cuenta de Strava. Esto
+              nos permitirá procesar tus actividades y mostrarte tu estado de
+              forma real.
+            </p>
+
+            <Button
+              onClick={handleStravaConnect}
+              className="bg-[#FC4C02] hover:bg-[#E34402] text-white font-black py-8 px-10 rounded-2xl text-lg shadow-2xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 group flex items-center gap-3"
             >
-              Potencia Media
-            </TabsTrigger>
-            <TabsTrigger
-              value="rpe"
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-xl text-gray-400 font-bold transition-all"
-            >
-              Esfuerzo (RPE)
-            </TabsTrigger>
-            <TabsTrigger
-              value="fatigue"
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-xl text-gray-400 font-bold transition-all"
-            >
-              Fatiga Acumulada
-            </TabsTrigger>
-          </TabsList>
+              <span>INICIAR SESIÓN CON STRAVA</span>
+              <svg
+                viewBox="0 0 24 24"
+                className="w-5 h-5 fill-none stroke-current stroke-2 transition-transform group-hover:translate-x-1"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5 12h14m-7-7l7 7-7 7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Button>
 
-          <TabsContent value="power">
-            <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl">
-              <CardTitle className="mb-8 flex items-center gap-3 text-blue-500 font-black">
-                <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
-                ANÁLISIS DE POTENCIA
-              </CardTitle>
-              <div className="h-[400px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={powerData}>
-                    <defs>
-                      <linearGradient
-                        id="colorPower"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#3b82f6"
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#3b82f6"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="#1f2937"
-                      vertical={false}
-                    />
-                    <XAxis
-                      dataKey="day"
-                      stroke="#6b7280"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                      dy={10}
-                    />
-                    <YAxis
-                      stroke="#6b7280"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#111827',
-                        border: '1px solid #374151',
-                        borderRadius: '12px',
-                      }}
-                      itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="power"
-                      stroke="#3b82f6"
-                      strokeWidth={4}
-                      fillOpacity={1}
-                      fill="url(#colorPower)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="rpe">
-            <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl">
-              <CardTitle className="mb-8 flex items-center gap-3 text-blue-500 font-black">
-                <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
-                RELACIÓN DE ESFUERZO
-              </CardTitle>
-              <div className="h-[400px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={powerData}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="#1f2937"
-                      vertical={false}
-                    />
-                    <XAxis
-                      dataKey="day"
-                      stroke="#6b7280"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                      dy={10}
-                    />
-                    <YAxis
-                      stroke="#6b7280"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#111827',
-                        border: '1px solid #374151',
-                        borderRadius: '12px',
-                      }}
-                      itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
-                    />
-                    <Bar dataKey="rpe" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        <div className="grid md:grid-cols-2 gap-8 mt-12">
-          <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl">
-            <CardTitle className="mb-6 font-black italic uppercase">
-              Próximos Objetivos
-            </CardTitle>
-            <div className="space-y-6">
+            <p className="mt-8 text-[10px] text-gray-700 font-bold uppercase tracking-widest">
+              Conexión segura vía Strava API v3
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
               {[
-                { title: 'Maratón de París', date: 'Abril 2026', progress: 65 },
                 {
-                  title: 'Ironman 70.3 Panama',
-                  date: 'Febrero 2026',
-                  progress: 88,
+                  label: 'Critical Power',
+                  value: '285 W',
+                  delta: '+5',
+                  color: 'text-orange-500',
                 },
-              ].map((goal, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex justify-between text-sm font-bold uppercase tracking-wider">
-                    <span className="text-white">{goal.title}</span>
-                    <span className="text-blue-500">{goal.progress}%</span>
-                  </div>
-                  <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 transition-all duration-1000"
-                      style={{ width: `${goal.progress}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                    {goal.date}
+                {
+                  label: 'RSS (7d)',
+                  value: '450',
+                  delta: '-12',
+                  color: 'text-blue-400',
+                },
+                {
+                  label: 'Leg Spring Stiffness',
+                  value: '9.2 kN/m',
+                  delta: '+0.2',
+                  color: 'text-purple-400',
+                },
+                {
+                  label: 'Efficiency Index',
+                  value: '1.45',
+                  delta: '+0.03',
+                  color: 'text-green-400',
+                },
+              ].map((stat, i) => (
+                <Card
+                  key={i}
+                  className="bg-gray-900 border-gray-800 p-6 rounded-2xl border-l-4 border-l-blue-500"
+                >
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
+                    {stat.label}
                   </p>
-                </div>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-black text-white">
+                      {stat.value}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-xs font-bold',
+                        stat.delta.startsWith('+')
+                          ? 'text-green-500'
+                          : 'text-red-500',
+                      )}
+                    >
+                      {stat.delta}
+                    </span>
+                  </div>
+                </Card>
               ))}
             </div>
-          </Card>
 
-          <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl border-r-4 border-r-blue-500/20">
-            <CardTitle className="mb-6 font-black italic uppercase">
-              Insights de IA
-            </CardTitle>
-            <div className="bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
-              <p className="text-blue-200 leading-relaxed italic">
-                "Basado en tus últimos entrenamientos de alta intensidad, tu
-                fatiga muscular está aumentando. Se recomienda un día de
-                recuperación activa mañana para optimizar tu CP el fin de
-                semana."
-              </p>
-              <Button
-                variant="link"
-                className="text-blue-500 font-bold p-0 mt-4 uppercase tracking-widest text-xs"
-              >
-                Ver análisis detallado →
-              </Button>
+            <Tabs defaultValue="power" className="space-y-8">
+              <TabsList className="bg-gray-900 border border-gray-800 p-1.5 rounded-2xl w-full max-w-md">
+                <TabsTrigger
+                  value="power"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-xl text-gray-400 font-bold transition-all"
+                >
+                  Potencia Media
+                </TabsTrigger>
+                <TabsTrigger
+                  value="rpe"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-xl text-gray-400 font-bold transition-all"
+                >
+                  Esfuerzo (RPE)
+                </TabsTrigger>
+                <TabsTrigger
+                  value="fatigue"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-xl text-gray-400 font-bold transition-all"
+                >
+                  Fatiga Acumulada
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="power">
+                <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl">
+                  <CardTitle className="mb-8 flex items-center gap-3 text-blue-500 font-black">
+                    <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
+                    ANÁLISIS DE RENDIMIENTO (CTL / ATL / TSB)
+                  </CardTitle>
+                  {isLoadingMetrics ? (
+                    <div className="h-[400px] flex items-center justify-center">
+                      <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+                    </div>
+                  ) : (
+                    <PerformanceChart data={metrics} ftp={ftp} />
+                  )}
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="rpe">
+                <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl">
+                  <CardTitle className="mb-8 flex items-center gap-3 text-blue-500 font-black">
+                    <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
+                    RELACIÓN DE ESFUERZO
+                  </CardTitle>
+                  <div className="h-[400px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={powerData}>
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#1f2937"
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="day"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                          dy={10}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#111827',
+                            border: '1px solid #374151',
+                            borderRadius: '12px',
+                          }}
+                          itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
+                        />
+                        <Bar
+                          dataKey="rpe"
+                          fill="#3b82f6"
+                          radius={[6, 6, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+              </TabsContent>
+            </Tabs>
+
+            <div className="grid md:grid-cols-2 gap-8 mt-12">
+              <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl">
+                <CardTitle className="mb-6 font-black italic uppercase">
+                  Próximos Objetivos
+                </CardTitle>
+                <div className="space-y-6">
+                  {[
+                    {
+                      title: 'Maratón de París',
+                      date: 'Abril 2026',
+                      progress: 65,
+                    },
+                    {
+                      title: 'Ironman 70.3 Panama',
+                      date: 'Febrero 2026',
+                      progress: 88,
+                    },
+                  ].map((goal, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between text-sm font-bold uppercase tracking-wider">
+                        <span className="text-white">{goal.title}</span>
+                        <span className="text-blue-500">{goal.progress}%</span>
+                      </div>
+                      <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500 transition-all duration-1000"
+                          style={{ width: `${goal.progress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                        {goal.date}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl border-r-4 border-r-blue-500/20">
+                <CardTitle className="mb-6 font-black italic uppercase">
+                  Insights de IA
+                </CardTitle>
+                <div className="bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
+                  <p className="text-blue-200 leading-relaxed italic">
+                    "Basado en tus últimos entrenamientos de alta intensidad, tu
+                    fatiga muscular está aumentando. Se recomienda un día de
+                    recuperación activa mañana para optimizar tu CP el fin de
+                    semana."
+                  </p>
+                  <Button
+                    variant="link"
+                    className="text-blue-500 font-bold p-0 mt-4 uppercase tracking-widest text-xs"
+                  >
+                    Ver análisis detallado →
+                  </Button>
+                </div>
+              </Card>
             </div>
-          </Card>
-        </div>
+          </>
+        )}
       </div>
     </div>
   )

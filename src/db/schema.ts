@@ -71,6 +71,28 @@ export const users = sqliteTable('users', {
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
     sql`(strftime('%s', 'now'))`,
   ),
+
+  // Strava Integration
+  stravaAthleteId: integer('strava_athlete_id'),
+  stravaAccessToken: text('strava_access_token'),
+  stravaRefreshToken: text('strava_refresh_token'),
+  stravaExpiresAt: integer('strava_expires_at'),
+  metricPreference: text('metric_preference').default('heart_rate'), // 'heart_rate' or 'power'
+
+  // Stryd Integration
+  strydToken: text('stryd_token'),
+})
+
+export const ftpHistory = sqliteTable('ftp_history', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+  ftp: integer('ftp').notNull(),
+  date: text('date').notNull(), // YYYY-MM-DD
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(
+    sql`(strftime('%s', 'now'))`,
+  ),
 })
 
 export const membershipRequests = sqliteTable('membership_requests', {

@@ -50,6 +50,13 @@
       "when": 1771887046478,
       "tag": "0006_tough_ravenous",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1771889677543,
+      "tag": "0007_secret_infant_terrible",
+      "breakpoints": true
     }
   ]
 }
