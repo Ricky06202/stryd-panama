@@ -2,13 +2,28 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { PerformanceChart } from '@/components/PerformanceChart'
-import { Loader2, Users, Settings, BarChart2 } from 'lucide-react'
+import {
+  Loader2,
+  Users,
+  Settings,
+  BarChart2,
+  Trash2,
+  Plus,
+  Calendar,
+} from 'lucide-react'
+import { Input } from '@/components/ui/input'
 
 interface Athlete {
   id: number
   fullName: string
   email: string
   stravaConnected: boolean
+}
+
+interface FtpRecord {
+  id: number
+  ftp: number
+  date: string
 }
 
 export function CoachingPage() {
@@ -20,6 +35,9 @@ export function CoachingPage() {
   const [ftp, setFtp] = useState<number | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(false)
+  const [ftpHistoryItems, setFtpHistoryItems] = useState<FtpRecord[]>([])
+  const [newFtp, setNewFtp] = useState({ value: '', date: '' })
+  const [isAddingFtp, setIsAddingFtp] = useState(false)
   const [performanceStats, setPerformanceStats] = useState({
     ctl: 0,
     atl: 0,
@@ -55,6 +73,7 @@ export function CoachingPage() {
         const data = (await response.json()) as any
         setMetrics(data.metrics)
         setFtp(data.ftp)
+        setFtpHistoryItems(data.ftpHistory || [])
         setPerformanceStats({
           ctl: data.ctl || 0,
           atl: data.atl || 0,
@@ -63,12 +82,55 @@ export function CoachingPage() {
         })
       } else {
         setMetrics([])
+        setFtpHistoryItems([])
       }
     } catch (error) {
       console.error('Error fetching metrics:', error)
       setMetrics([])
     } finally {
       setIsLoadingMetrics(false)
+    }
+  }
+
+  const handleAddFtp = async () => {
+    if (!selectedAthleteId || !newFtp.value || !newFtp.date) return
+    setIsAddingFtp(true)
+    try {
+      const response = await fetch('/api/admin/ftp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: selectedAthleteId,
+          ftp: newFtp.value,
+          date: newFtp.date,
+        }),
+      })
+
+      if (response.ok) {
+        setNewFtp({ value: '', date: '' })
+        fetchAthleteMetrics(selectedAthleteId) // Actualizar todo
+      }
+    } catch (error) {
+      console.error('Error adding FTP:', error)
+    } finally {
+      setIsAddingFtp(false)
+    }
+  }
+
+  const handleDeleteFtp = async (id: number) => {
+    if (!confirm('¿Estás seguro de eliminar este registro de FTP?')) return
+    try {
+      const response = await fetch('/api/admin/ftp', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+
+      if (response.ok && selectedAthleteId) {
+        fetchAthleteMetrics(selectedAthleteId)
+      }
+    } catch (error) {
+      console.error('Error deleting FTP:', error)
     }
   }
 
@@ -257,6 +319,112 @@ export function CoachingPage() {
                 </div>
               </div>
               <PerformanceChart data={metrics} ftp={ftp} />
+
+              {/* Gestión de FTP */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Formulario Añadir */}
+                <Card className="bg-gray-900 border-gray-800 rounded-2xl md:col-span-1">
+                  <CardHeader className="pb-3 px-6 pt-6">
+                    <CardTitle className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                      <Plus className="w-3 h-3 text-orange-500" />
+                      Registrar Nuevo FTP
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase font-bold text-gray-500">
+                        Valor FTP (Watts)
+                      </label>
+                      <Input
+                        type="number"
+                        placeholder="Ej: 250"
+                        value={newFtp.value}
+                        onChange={(e) =>
+                          setNewFtp({ ...newFtp, value: e.target.value })
+                        }
+                        className="bg-black border-gray-800 rounded-xl text-white h-12"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase font-bold text-gray-500">
+                        Fecha de Toma
+                      </label>
+                      <Input
+                        type="date"
+                        value={newFtp.date}
+                        onChange={(e) =>
+                          setNewFtp({ ...newFtp, date: e.target.value })
+                        }
+                        className="bg-black border-gray-800 rounded-xl text-white h-12"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleAddFtp}
+                      disabled={isAddingFtp || !newFtp.value || !newFtp.date}
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl h-12 shadow-lg shadow-orange-950/20"
+                    >
+                      {isAddingFtp ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        'Guardar FTP'
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Historial */}
+                <Card className="bg-gray-900 border-gray-800 rounded-2xl md:col-span-2">
+                  <CardHeader className="pb-3 px-6 pt-6 border-b border-gray-800/50">
+                    <CardTitle className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                      <Calendar className="w-3 h-3 text-orange-500" />
+                      Historial de FTP
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0 max-h-[300px] overflow-y-auto">
+                    {ftpHistoryItems.length === 0 ? (
+                      <div className="p-12 text-center text-gray-500 text-sm italic">
+                        No hay historial de FTP registrado.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-gray-800">
+                        {ftpHistoryItems.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between p-4 px-6 hover:bg-gray-800/30 transition-colors"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-black rounded-xl border border-gray-800 flex items-center justify-center font-black text-orange-500">
+                                {item.ftp}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-white">
+                                  {item.ftp} Watts
+                                </p>
+                                <p className="text-[10px] text-gray-500">
+                                  {new Date(item.date).toLocaleDateString(
+                                    'es-PA',
+                                    {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric',
+                                    },
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteFtp(item.id)}
+                              className="w-8 h-8 rounded-lg hover:bg-red-500/10 flex items-center justify-center group transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4 text-gray-600 group-hover:text-red-500" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           )}
         </div>

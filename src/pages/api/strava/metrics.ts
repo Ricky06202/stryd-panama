@@ -27,10 +27,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const STRAVA_CLIENT_SECRET = locals.runtime.env
       .STRAVA_CLIENT_SECRET as string
 
-    // 1. Get user and their latest FTP
-    const [user, latestFtp] = await Promise.all([
+    // 1. Get user and their FTP history
+    const [user, ftpRecords] = await Promise.all([
       db.query.users.findFirst({ where: eq(users.id, id) }),
-      db.query.ftpHistory.findFirst({
+      db.query.ftpHistory.findMany({
         where: eq(ftpHistory.userId, id),
         orderBy: [desc(ftpHistory.date)],
       }),
@@ -42,6 +42,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
       })
     }
 
+    // Default FTP if no history
+    const defaultFtp = user.strydUser ? 250 : 200
+
     // 2. Fetch last 365 days of activities
     const rawActivities = await getAthleteFullHistory(
       db,
@@ -50,24 +53,47 @@ export const GET: APIRoute = async ({ request, locals }) => {
       STRAVA_CLIENT_SECRET,
     )
 
-    // 3. Process activities to get TSS
-    const ftp = latestFtp?.ftp || 200 // Default if no history
-    const activitiesWithTSS = rawActivities.map((a: any) => ({
-      date: (a.start_date_local || a.start_date).split('T')[0],
-      tss: calculateTSS(a, ftp),
-    }))
+    // Helper to find the active FTP for a given date
+    const getFtpForDate = (date: string) => {
+      // ftpRecords is sorted by date DESC
+      const activeRecord = ftpRecords.find((r: any) => r.date <= date)
+      return activeRecord?.ftp || defaultFtp
+    }
+
+    // 3. Process activities to get TSS using historical FTP
+    const activitiesWithTSS = rawActivities.map((a: any) => {
+      const date = (a.start_date_local || a.start_date).split('T')[0]
+      const ftpAtTime = getFtpForDate(date)
+      return {
+        date,
+        tss: calculateTSS(a, ftpAtTime),
+      }
+    })
 
     // 4. Calculate Time Series and Stats
-    const metrics = calculatePerformanceTimeSeries(activitiesWithTSS, 90) // Last 90 days for the chart
+    const metricsRaw = calculatePerformanceTimeSeries(activitiesWithTSS, 90) // Last 90 days
+
+    // Add current FTP to metrics for the chart
+    const metrics = metricsRaw.map((m) => ({
+      ...m,
+      ftp: getFtpForDate(m.date),
+    }))
+
     const rss = calculateRSS(activitiesWithTSS, 7)
 
     // Get current state (last element of metrics)
-    const current = metrics[metrics.length - 1] || { ctl: 0, atl: 0, tsb: 0 }
+    const current = metrics[metrics.length - 1] || {
+      ctl: 0,
+      atl: 0,
+      tsb: 0,
+      ftp: defaultFtp,
+    }
 
     return new Response(
       JSON.stringify({
         metrics,
-        ftp,
+        ftp: current.ftp,
+        ftpHistory: ftpRecords, // Also send history list for UI
         rss,
         ctl: current.ctl,
         atl: current.atl,

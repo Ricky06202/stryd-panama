@@ -18,6 +18,7 @@ interface PerformanceData {
   ctl: number
   atl: number
   tsb: number
+  ftp?: number
 }
 
 interface PerformanceChartProps {
@@ -106,6 +107,17 @@ export function PerformanceChart({ data, ftp }: PerformanceChartProps) {
             stroke="#f59e0b"
             strokeWidth={3}
             dot={false}
+          />
+
+          {/* FTP History (Step Line) */}
+          <Line
+            type="stepAfter"
+            dataKey="ftp"
+            name="FTP (W)"
+            stroke="#9ca3af"
+            strokeWidth={2}
+            dot={false}
+            strokeOpacity={0.5}
           />
 
           {/* ATL - Fatigue (Line) */}
