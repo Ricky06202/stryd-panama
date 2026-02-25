@@ -53,7 +53,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     // 3. Process activities to get TSS
     const ftp = latestFtp?.ftp || 200 // Default if no history
     const activitiesWithTSS = rawActivities.map((a: any) => ({
-      date: a.start_date.split('T')[0],
+      date: (a.start_date_local || a.start_date).split('T')[0],
       tss: calculateTSS(a, ftp),
     }))
 

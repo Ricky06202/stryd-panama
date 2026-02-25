@@ -953,12 +953,6 @@ export function StrydBoardPage() {
                 )}
               </Button>
             )}
-            <Button
-              variant="outline"
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 rounded-xl px-6"
-            >
-              Exportar CSV
-            </Button>
           </div>
         </header>
 

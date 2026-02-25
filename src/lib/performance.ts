@@ -54,20 +54,28 @@ export function calculatePerformanceTimeSeries(
     loadByDate[a.date] = (loadByDate[a.date] || 0) + a.tss
   })
 
-  // 2. Determinar el rango total de procesamiento vs el de retorno
-  // Queremos procesar todas las actividades para que CTL/ATL sean correctos,
-  // pero solo devolver los últimos N días.
+  // 2. Determinar el rango total de procesamiento vs el de retorno en America/Panama
+  const getPanamaDate = (date: Date = new Date()) => {
+    return new Date(
+      date.toLocaleString('en-US', { timeZone: 'America/Panama' }),
+    )
+  }
+
+  const todayPanama = getPanamaDate()
+  const maxDate = new Date(todayPanama)
+  maxDate.setHours(0, 0, 0, 0)
 
   // Encontrar la actividad más antigua
   const dates = activities.map((a) => new Date(a.date).getTime())
-  const minDate = dates.length > 0 ? new Date(Math.min(...dates)) : new Date()
-  const maxDate = new Date() // Hoy
+  const minDate =
+    dates.length > 0 ? new Date(Math.min(...dates)) : new Date(maxDate)
+  minDate.setHours(0, 0, 0, 0)
 
   const stats: DayStats[] = []
   let currentCTL = 0
   let currentATL = 0
 
-  const returnStartDate = new Date()
+  const returnStartDate = new Date(maxDate)
   returnStartDate.setDate(maxDate.getDate() - daysToReturn)
 
   // Procesar día a día desde la actividad más antigua o hace 1 año
@@ -98,9 +106,16 @@ export function calculatePerformanceTimeSeries(
  * Calculates total TSS for a given number of days back from today
  */
 export function calculateRSS(activities: TrainingActivity[], days = 7): number {
-  const endDate = new Date()
-  const startDate = new Date()
+  const getPanamaDate = (date: Date = new Date()) => {
+    return new Date(
+      date.toLocaleString('en-US', { timeZone: 'America/Panama' }),
+    )
+  }
+
+  const endDate = getPanamaDate()
+  const startDate = new Date(endDate)
   startDate.setDate(endDate.getDate() - days)
+  startDate.setHours(0, 0, 0, 0)
 
   const startStr = startDate.toISOString().split('T')[0]
 
