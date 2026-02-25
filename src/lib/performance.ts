@@ -46,7 +46,7 @@ export function calculateTSS(activity: any, ftp?: number): number {
  */
 export function calculatePerformanceTimeSeries(
   activities: TrainingActivity[],
-  days = 90,
+  daysToReturn = 90,
 ): DayStats[] {
   // 1. Mapear actividades a un objeto por fecha
   const loadByDate: Record<string, number> = {}
@@ -54,16 +54,24 @@ export function calculatePerformanceTimeSeries(
     loadByDate[a.date] = (loadByDate[a.date] || 0) + a.tss
   })
 
-  // 2. Generar serie temporal continua
+  // 2. Determinar el rango total de procesamiento vs el de retorno
+  // Queremos procesar todas las actividades para que CTL/ATL sean correctos,
+  // pero solo devolver los últimos N días.
+
+  // Encontrar la actividad más antigua
+  const dates = activities.map((a) => new Date(a.date).getTime())
+  const minDate = dates.length > 0 ? new Date(Math.min(...dates)) : new Date()
+  const maxDate = new Date() // Hoy
+
   const stats: DayStats[] = []
   let currentCTL = 0
   let currentATL = 0
 
-  const endDate = new Date()
-  const startDate = new Date()
-  startDate.setDate(endDate.getDate() - days)
+  const returnStartDate = new Date()
+  returnStartDate.setDate(maxDate.getDate() - daysToReturn)
 
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+  // Procesar día a día desde la actividad más antigua o hace 1 año
+  for (let d = new Date(minDate); d <= maxDate; d.setDate(d.getDate() + 1)) {
     const dateStr = d.toISOString().split('T')[0]
     const tss = loadByDate[dateStr] || 0
 
@@ -71,14 +79,34 @@ export function calculatePerformanceTimeSeries(
     currentCTL = currentCTL + (tss - currentCTL) * (1 / 42)
     currentATL = currentATL + (tss - currentATL) * (1 / 7)
 
-    stats.push({
-      date: dateStr,
-      tss,
-      ctl: Math.round(currentCTL * 10) / 10,
-      atl: Math.round(currentATL * 10) / 10,
-      tsb: Math.round((currentCTL - currentATL) * 10) / 10,
-    })
+    // Solo guardar si está en el rango de retorno
+    if (d >= returnStartDate) {
+      stats.push({
+        date: dateStr,
+        tss,
+        ctl: Math.round(currentCTL * 100) / 100,
+        atl: Math.round(currentATL * 100) / 100,
+        tsb: Math.round((currentCTL - currentATL) * 100) / 100,
+      })
+    }
   }
 
   return stats
+}
+
+/**
+ * Calculates total TSS for a given number of days back from today
+ */
+export function calculateRSS(activities: TrainingActivity[], days = 7): number {
+  const endDate = new Date()
+  const startDate = new Date()
+  startDate.setDate(endDate.getDate() - days)
+
+  const startStr = startDate.toISOString().split('T')[0]
+
+  return Math.round(
+    activities
+      .filter((a) => a.date >= startStr)
+      .reduce((acc, curr) => acc + curr.tss, 0),
+  )
 }

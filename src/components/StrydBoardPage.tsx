@@ -87,6 +87,12 @@ export function StrydBoardPage() {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(false)
   const [ftp, setFtp] = useState<number | undefined>(undefined)
+  const [performanceStats, setPerformanceStats] = useState({
+    rss: 0,
+    ctl: 0,
+    atl: 0,
+    tsb: 0,
+  })
 
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const [loginError, setLoginError] = useState<string | null>(null)
@@ -253,6 +259,12 @@ export function StrydBoardPage() {
         const data = (await response.json()) as any
         setMetrics(data.metrics)
         setFtp(data.ftp)
+        setPerformanceStats({
+          rss: data.rss,
+          ctl: data.ctl,
+          atl: data.atl,
+          tsb: data.tsb,
+        })
       }
     } catch (error) {
       console.error('Error fetching metrics:', error)
@@ -266,6 +278,18 @@ export function StrydBoardPage() {
       fetchMetrics()
     }
   }, [view, currentUserId, profile.stravaConnected])
+
+  useEffect(() => {
+    // Detect if we just connected Strava
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('strava') === 'connected' && !profile.stravaConnected) {
+      setProfile((prev) => ({ ...prev, stravaConnected: true }))
+      setSaveMessage('¡Strava conectado con éxito!')
+      setTimeout(() => setSaveMessage(null), 5000)
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [profile.stravaConnected])
 
   const handleStravaConnect = () => {
     const clientId = '197123' // From .env
@@ -990,33 +1014,36 @@ export function StrydBoardPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
               {[
                 {
-                  label: 'Critical Power',
-                  value: '285 W',
-                  delta: '+5',
+                  label: 'Fitness (CTL)',
+                  value: performanceStats.ctl.toFixed(2),
+                  delta: 'Forma actual',
                   color: 'text-orange-500',
                 },
                 {
                   label: 'RSS (7d)',
-                  value: '450',
-                  delta: '-12',
+                  value: performanceStats.rss,
+                  delta: 'Carga semanal',
                   color: 'text-blue-400',
                 },
                 {
-                  label: 'Leg Spring Stiffness',
-                  value: '9.2 kN/m',
-                  delta: '+0.2',
-                  color: 'text-purple-400',
+                  label: 'Fatiga (ATL)',
+                  value: performanceStats.atl.toFixed(2),
+                  delta: 'Cansancio',
+                  color: 'text-red-400',
                 },
                 {
-                  label: 'Efficiency Index',
-                  value: '1.45',
-                  delta: '+0.03',
-                  color: 'text-green-400',
+                  label: 'Forma (TSB)',
+                  value: performanceStats.tsb.toFixed(2),
+                  delta: performanceStats.tsb > 0 ? 'Fresco' : 'Fatigado',
+                  color:
+                    performanceStats.tsb > 0
+                      ? 'text-green-400'
+                      : 'text-orange-400',
                 },
               ].map((stat, i) => (
                 <Card
                   key={i}
-                  className="bg-gray-900 border-gray-800 p-6 rounded-2xl border-l-4 border-l-blue-500"
+                  className="bg-gray-900 border-gray-800 p-6 rounded-2xl border-l-4 border-l-orange-500"
                 >
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
                     {stat.label}
@@ -1027,10 +1054,8 @@ export function StrydBoardPage() {
                     </span>
                     <span
                       className={cn(
-                        'text-xs font-bold',
-                        stat.delta.startsWith('+')
-                          ? 'text-green-500'
-                          : 'text-red-500',
+                        'text-[10px] font-bold uppercase tracking-tighter opacity-70',
+                        stat.color,
                       )}
                     >
                       {stat.delta}
@@ -1082,107 +1107,65 @@ export function StrydBoardPage() {
                 <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl">
                   <CardTitle className="mb-8 flex items-center gap-3 text-blue-500 font-black">
                     <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
-                    RELACIÓN DE ESFUERZO
+                    CARGA DIARIA (TSS) - ÚLTIMOS 7 DÍAS
                   </CardTitle>
                   <div className="h-[400px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={powerData}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="#1f2937"
-                          vertical={false}
-                        />
-                        <XAxis
-                          dataKey="day"
-                          stroke="#6b7280"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                          dy={10}
-                        />
-                        <YAxis
-                          stroke="#6b7280"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: '#111827',
-                            border: '1px solid #374151',
-                            borderRadius: '12px',
-                          }}
-                          itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
-                        />
-                        <Bar
-                          dataKey="rpe"
-                          fill="#3b82f6"
-                          radius={[6, 6, 0, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    {isLoadingMetrics ? (
+                      <div className="h-full flex items-center justify-center">
+                        <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={metrics.slice(-7).map((m) => ({
+                            ...m,
+                            day: new Date(
+                              m.date + 'T00:00:00',
+                            ).toLocaleDateString('es-PA', { weekday: 'short' }),
+                          }))}
+                        >
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="#1f2937"
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="day"
+                            stroke="#6b7280"
+                            fontSize={12}
+                            tickLine={false}
+                            axisLine={false}
+                            dy={10}
+                          />
+                          <YAxis
+                            stroke="#6b7280"
+                            fontSize={12}
+                            tickLine={false}
+                            axisLine={false}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#111827',
+                              border: '1px solid #374151',
+                              borderRadius: '12px',
+                            }}
+                            itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
+                          />
+                          <Bar
+                            dataKey="tss"
+                            name="Carga (TSS)"
+                            fill="#3b82f6"
+                            radius={[6, 6, 0, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </Card>
               </TabsContent>
             </Tabs>
 
-            <div className="grid md:grid-cols-2 gap-8 mt-12">
-              <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl">
-                <CardTitle className="mb-6 font-black italic uppercase">
-                  Próximos Objetivos
-                </CardTitle>
-                <div className="space-y-6">
-                  {[
-                    {
-                      title: 'Maratón de París',
-                      date: 'Abril 2026',
-                      progress: 65,
-                    },
-                    {
-                      title: 'Ironman 70.3 Panama',
-                      date: 'Febrero 2026',
-                      progress: 88,
-                    },
-                  ].map((goal, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between text-sm font-bold uppercase tracking-wider">
-                        <span className="text-white">{goal.title}</span>
-                        <span className="text-blue-500">{goal.progress}%</span>
-                      </div>
-                      <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500 transition-all duration-1000"
-                          style={{ width: `${goal.progress}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                        {goal.date}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl border-r-4 border-r-blue-500/20">
-                <CardTitle className="mb-6 font-black italic uppercase">
-                  Insights de IA
-                </CardTitle>
-                <div className="bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
-                  <p className="text-blue-200 leading-relaxed italic">
-                    "Basado en tus últimos entrenamientos de alta intensidad, tu
-                    fatiga muscular está aumentando. Se recomienda un día de
-                    recuperación activa mañana para optimizar tu CP el fin de
-                    semana."
-                  </p>
-                  <Button
-                    variant="link"
-                    className="text-blue-500 font-bold p-0 mt-4 uppercase tracking-widest text-xs"
-                  >
-                    Ver análisis detallado →
-                  </Button>
-                </div>
-              </Card>
-            </div>
+            {/* Insights and Objectives hidden until we have real data feed */}
           </>
         )}
       </div>

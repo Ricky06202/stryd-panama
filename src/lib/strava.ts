@@ -62,8 +62,9 @@ export async function fetchStravaActivities(
   accessToken: string,
   before?: number,
   after?: number,
+  page: number = 1,
 ) {
-  let url = 'https://www.strava.com/api/v3/athlete/activities?per_page=200'
+  let url = `https://www.strava.com/api/v3/athlete/activities?per_page=200&page=${page}`
   if (before) url += `&before=${before}`
   if (after) url += `&after=${after}`
 
@@ -98,22 +99,26 @@ export async function getAthleteFullHistory(
 
   let allActivities: any[] = []
   let hasMore = true
+  let page = 1
 
-  while (hasMore) {
+  // Fetch up to 1000 activities (5 pages) or until no more are found
+  while (hasMore && page <= 5) {
     const activities = await fetchStravaActivities(
       accessToken,
       undefined,
       oneYearAgo,
+      page,
     )
+
     if (activities.length === 0) {
       hasMore = false
     } else {
       allActivities = [...allActivities, ...activities]
-      // Strava pagination is a bit tricky with time range,
-      // but since we want the last 365 days, fetching a few pages should suffice.
-      // For simplicity, we assume we don't have > 200 activities in a year for now,
-      // or we handle pagination correctly if needed.
-      hasMore = false // Simplified for now
+      if (activities.length < 200) {
+        hasMore = false
+      } else {
+        page++
+      }
     }
   }
 

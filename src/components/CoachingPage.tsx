@@ -20,6 +20,12 @@ export function CoachingPage() {
   const [ftp, setFtp] = useState<number | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(false)
+  const [performanceStats, setPerformanceStats] = useState({
+    ctl: 0,
+    atl: 0,
+    tsb: 0,
+    rss: 0,
+  })
 
   useEffect(() => {
     fetchAthletes()
@@ -49,6 +55,12 @@ export function CoachingPage() {
         const data = (await response.json()) as any
         setMetrics(data.metrics)
         setFtp(data.ftp)
+        setPerformanceStats({
+          ctl: data.ctl || 0,
+          atl: data.atl || 0,
+          tsb: data.tsb || 0,
+          rss: data.rss || 0,
+        })
       } else {
         setMetrics([])
       }
@@ -178,6 +190,68 @@ export function CoachingPage() {
                     </span>
                     <span className="text-orange-500 font-black">
                       {ftp || 'N/A'}W
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Métricas en Grande */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl border-l-4 border-l-orange-500">
+                  <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">
+                    Fitness (CTL)
+                  </p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-black text-white">
+                      {performanceStats.ctl.toFixed(2)}
+                    </span>
+                    <span className="text-[9px] font-bold text-orange-500 uppercase">
+                      Forma
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl border-l-4 border-l-blue-500">
+                  <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">
+                    Carga (RSS 7d)
+                  </p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-black text-white">
+                      {performanceStats.rss}
+                    </span>
+                    <span className="text-[9px] font-bold text-blue-500 uppercase">
+                      RSS
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl border-l-4 border-l-red-500">
+                  <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">
+                    Fatiga (ATL)
+                  </p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-black text-white">
+                      {performanceStats.atl.toFixed(2)}
+                    </span>
+                    <span className="text-[9px] font-bold text-red-500 uppercase">
+                      Cansancio
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl border-l-4 border-l-emerald-500">
+                  <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">
+                    Fresco (TSB)
+                  </p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-black text-white">
+                      {(performanceStats.tsb > 0 ? '+' : '') +
+                        performanceStats.tsb.toFixed(2)}
+                    </span>
+                    <span
+                      className={`text-[9px] font-bold uppercase ${performanceStats.tsb > 0 ? 'text-emerald-500' : 'text-orange-500'}`}
+                    >
+                      {performanceStats.tsb > 0 ? 'Óptimo' : 'Fatigado'}
                     </span>
                   </div>
                 </div>

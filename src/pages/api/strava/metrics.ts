@@ -6,6 +6,7 @@ import { getAthleteFullHistory } from '../../../lib/strava'
 import {
   calculateTSS,
   calculatePerformanceTimeSeries,
+  calculateRSS,
 } from '../../../lib/performance'
 
 export const GET: APIRoute = async ({ request, locals }) => {
@@ -56,12 +57,26 @@ export const GET: APIRoute = async ({ request, locals }) => {
       tss: calculateTSS(a, ftp),
     }))
 
-    // 4. Calculate Time Series
+    // 4. Calculate Time Series and Stats
     const metrics = calculatePerformanceTimeSeries(activitiesWithTSS, 90) // Last 90 days for the chart
+    const rss = calculateRSS(activitiesWithTSS, 7)
 
-    return new Response(JSON.stringify({ metrics, ftp }), {
-      headers: { 'Content-Type': 'application/json' },
-    })
+    // Get current state (last element of metrics)
+    const current = metrics[metrics.length - 1] || { ctl: 0, atl: 0, tsb: 0 }
+
+    return new Response(
+      JSON.stringify({
+        metrics,
+        ftp,
+        rss,
+        ctl: current.ctl,
+        atl: current.atl,
+        tsb: current.tsb,
+      }),
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    )
   } catch (error) {
     console.error('Metrics Error:', error)
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
