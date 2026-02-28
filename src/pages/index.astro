@@ -12,6 +12,11 @@ import { ReviewsCarousel } from '@/components/ReviewsCarousel'
 import { sql } from 'drizzle-orm'
 
 const db = getDb(Astro.locals.runtime.env.DB)
+
+if (!Astro.locals.runtime.env.DB) {
+  console.error('CRITICAL: Astro.locals.runtime.env.DB is UNDEFINED')
+}
+
 const reviews = (
   await db
     .select({
