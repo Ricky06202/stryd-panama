@@ -363,6 +363,52 @@ export function StrydBoardPage() {
     }
   }
 
+  const getPerformanceSummary = () => {
+    const { tsb, rampRate } = performanceStats
+    let title = 'Análisis de Rendimiento'
+    let message = ''
+    let icon = <Activity className="w-6 h-6" />
+    let colorClass = 'text-blue-400'
+    let bgClass = 'bg-blue-500/10'
+
+    if (tsb > 5) {
+      title = 'Estado: Frescura'
+      message =
+        'Te encuentras en una zona de frescura óptima. Tus niveles de fatiga son bajos y estás listo para un esfuerzo máximo o una competición. ¡Es el momento ideal para brillar!'
+      icon = <Award className="w-6 h-6" />
+      colorClass = 'text-green-400'
+      bgClass = 'bg-green-500/20'
+    } else if (tsb >= -10) {
+      title = 'Estado: Mantenimiento'
+      message =
+        'Estás manteniendo un equilibrio excelente entre carga y recuperación. Sigue con tu plan actual para consolidar tu forma física sin riesgos innecesarios.'
+      icon = <Activity className="w-6 h-6" />
+      colorClass = 'text-blue-400'
+      bgClass = 'bg-blue-500/20'
+    } else if (tsb >= -30) {
+      title = 'Estado: Crecimiento Productivo'
+      message =
+        "Estás en la 'zona dulce' del entrenamiento. Estás acumulando carga de forma efectiva y mejorando tu CTL de manera sólida. ¡Sigue así, estás construyendo una base espectacular!"
+      icon = <TrendingUp className="w-6 h-6" />
+      colorClass = 'text-orange-400'
+      bgClass = 'bg-orange-500/20'
+    } else {
+      title = 'Estado: Alta Fatiga'
+      message =
+        'Tu nivel de fatiga es elevado. Es un signo de entrenamiento duro, pero ten cuidado con el sobreentrenamiento. Valora un día de recuperación activa para asimilar el trabajo.'
+      icon = <Zap className="w-6 h-6" />
+      colorClass = 'text-red-400'
+      bgClass = 'bg-red-500/20'
+    }
+
+    if (rampRate > 5) {
+      message +=
+        ' Además, tu rampa de crecimiento es extraordinaria, lo que indica una progresión muy sólida en los últimos días.'
+    }
+
+    return { title, message, icon, colorClass, bgClass }
+  }
+
   useEffect(() => {
     if (view === 'performance' && currentUserId && profile.stravaConnected) {
       fetchMetrics()
@@ -1476,6 +1522,47 @@ export function StrydBoardPage() {
                 ))}
               </div>
             </div>
+
+            {/* Performance Summary Card */}
+            {(() => {
+              const summary = getPerformanceSummary()
+              return (
+                <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl mb-12 relative group hover:border-blue-500/30 transition-all">
+                  <div
+                    className={cn(
+                      'absolute top-0 right-0 p-8 opacity-5',
+                      summary.colorClass,
+                    )}
+                  >
+                    {summary.icon}
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-8 items-center">
+                    <div
+                      className={cn(
+                        'p-6 rounded-2xl flex items-center justify-center shadow-inner',
+                        summary.bgClass,
+                        summary.colorClass,
+                      )}
+                    >
+                      {summary.icon}
+                    </div>
+                    <div>
+                      <h3
+                        className={cn(
+                          'text-2xl font-black mb-3 uppercase tracking-tight',
+                          summary.colorClass,
+                        )}
+                      >
+                        {summary.title}
+                      </h3>
+                      <p className="text-xl text-gray-300 leading-relaxed font-medium">
+                        {summary.message}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )
+            })()}
 
             {/* Weekly Performance Comparison (Image Reference) */}
             <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl mb-12">
