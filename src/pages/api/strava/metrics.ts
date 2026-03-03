@@ -81,6 +81,71 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     const rss = calculateRSS(activitiesWithTSS, 7)
 
+    // New detailed statistics
+    const getPanamaDate = (date: Date = new Date()) => {
+      return new Date(
+        date.toLocaleString('en-US', { timeZone: 'America/Panama' }),
+      )
+    }
+
+    const todayPanama = getPanamaDate()
+    const currentYear = todayPanama.getFullYear()
+    const currentMonth = todayPanama.getMonth()
+
+    // Weekly stats (last 7 days)
+    const sevenDaysAgo = new Date(todayPanama)
+    sevenDaysAgo.setDate(todayPanama.getDate() - 7)
+    sevenDaysAgo.setHours(0, 0, 0, 0)
+    const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0]
+
+    const weeklyActivities = rawActivities.filter((a: any) => {
+      const date = (a.start_date_local || a.start_date).split('T')[0]
+      return date >= sevenDaysAgoStr
+    })
+
+    const weekKm = Math.round(
+      weeklyActivities.reduce((acc, a) => acc + (a.distance || 0), 0) / 1000,
+    )
+    const weekDays = new Set(
+      weeklyActivities.map(
+        (a) => (a.start_date_local || a.start_date).split('T')[0],
+      ),
+    ).size
+
+    // Monthly stats (current calendar month)
+    const monthStart = new Date(currentYear, currentMonth, 1)
+    const monthStartStr = monthStart.toISOString().split('T')[0]
+
+    const monthlyActivities = rawActivities.filter((a: any) => {
+      const date = (a.start_date_local || a.start_date).split('T')[0]
+      return date >= monthStartStr
+    })
+
+    const monthKm = Math.round(
+      monthlyActivities.reduce((acc, a) => acc + (a.distance || 0), 0) / 1000,
+    )
+
+    // Yearly stats (calendar year)
+    const yearStart = new Date(currentYear, 0, 1)
+    const yearStartStr = yearStart.toISOString().split('T')[0]
+
+    const yearlyActivities = rawActivities.filter((a: any) => {
+      const date = (a.start_date_local || a.start_date).split('T')[0]
+      return date >= yearStartStr
+    })
+
+    const yearKm = Math.round(
+      yearlyActivities.reduce((acc, a) => acc + (a.distance || 0), 0) / 1000,
+    )
+
+    // Yearly training days (last 365 days or just this year?)
+    // The user said "días entrenados del año", usually means calendar year.
+    const yearDays = new Set(
+      yearlyActivities.map(
+        (a) => (a.start_date_local || a.start_date).split('T')[0],
+      ),
+    ).size
+
     // Get current state (last element of metrics)
     const current = metrics[metrics.length - 1] || {
       ctl: 0,
@@ -93,11 +158,17 @@ export const GET: APIRoute = async ({ request, locals }) => {
       JSON.stringify({
         metrics,
         ftp: current.ftp,
-        ftpHistory: ftpRecords, // Also send history list for UI
+        ftpHistory: ftpRecords,
         rss,
         ctl: current.ctl,
         atl: current.atl,
         tsb: current.tsb,
+        // Added stats
+        weekKm,
+        weekDays,
+        monthKm,
+        yearKm,
+        yearDays,
       }),
       {
         headers: { 'Content-Type': 'application/json' },

@@ -12,6 +12,7 @@ import {
   Calendar,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { AthleteCoachMessages } from '@/components/AthleteCoachMessages'
 
 interface Athlete {
   id: number
@@ -424,6 +425,11 @@ export function CoachingPage() {
                     )}
                   </CardContent>
                 </Card>
+              </div>
+
+              {/* Tablón de Mensajes */}
+              <div className="mt-8">
+                <AthleteCoachMessages athleteId={selectedAthleteId} />
               </div>
             </div>
           )}

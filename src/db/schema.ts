@@ -145,3 +145,14 @@ export const userReviews = sqliteTable('user_reviews', {
     sql`(strftime('%s', 'now'))`,
   ),
 })
+
+export const coachMessages = sqliteTable('coach_messages', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+  content: text('content').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(
+    sql`(strftime('%s', 'now'))`,
+  ),
+})

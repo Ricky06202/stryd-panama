@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro'
 import { getDb } from '../../../db/client'
 import { users, membershipRequests } from '../../../db/schema'
 import { eq, desc } from 'drizzle-orm'
+import { AthleteCoachMessages } from '../../../components/AthleteCoachMessages'
 
 const { id } = Astro.params
 const athleteId = parseInt(id || '')
@@ -413,6 +414,11 @@ if (lastRequest?.trainingGoals) {
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Sección de Mensajes del Coach -->
+      <div class="mt-8">
+        <AthleteCoachMessages athleteId={athleteId} client:load />
       </div>
     </div>
   </div>
