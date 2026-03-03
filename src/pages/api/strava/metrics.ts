@@ -146,6 +146,58 @@ export const GET: APIRoute = async ({ request, locals }) => {
       ),
     ).size
 
+    // Weekly comparison data (Mon-Sun)
+    const getMonday = (d: Date) => {
+      const day = d.getDay()
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1) // 0 is Sunday, adjust to 1 (Monday)
+      const monday = new Date(d)
+      monday.setDate(diff)
+      monday.setHours(0, 0, 0, 0)
+      return monday
+    }
+
+    const currentMonday = getMonday(todayPanama)
+    const lastMonday = new Date(currentMonday)
+    lastMonday.setDate(currentMonday.getDate() - 7)
+
+    const getDailyDistanceMap = (activities: any[]) => {
+      const map: Record<string, number> = {}
+      activities.forEach((a) => {
+        const date = (a.start_date_local || a.start_date).split('T')[0]
+        map[date] = (map[date] || 0) + (a.distance || 0) / 1000
+      })
+      return map
+    }
+
+    const dailyDistances = getDailyDistanceMap(rawActivities)
+
+    const getWeekData = (monday: Date) => {
+      const days = []
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday)
+        d.setDate(monday.getDate() + i)
+        const dateStr = d.toISOString().split('T')[0]
+        days.push(Math.round((dailyDistances[dateStr] || 0) * 10) / 10)
+      }
+      return days
+    }
+
+    const thisWeekDaily = getWeekData(currentMonday)
+    const lastWeekDaily = getWeekData(lastMonday)
+
+    // Calculate Average (historical average of daily distance or average of these two weeks?)
+    // Image shows "Media" dashed line. Let's do average of all active days in the last 30 days.
+    const thirtyDaysAgo = new Date(todayPanama)
+    thirtyDaysAgo.setDate(todayPanama.getDate() - 30)
+    const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0]
+    const last30DaysActivities = rawActivities.filter(
+      (a) =>
+        (a.start_date_local || a.start_date).split('T')[0] >= thirtyDaysAgoStr,
+    )
+    const totalDist30 =
+      last30DaysActivities.reduce((acc, a) => acc + (a.distance || 0), 0) / 1000
+    const avgDailyDist = Math.round((totalDist30 / 30) * 10) / 10
+
     // Get current state (last element of metrics)
     const current = metrics[metrics.length - 1] || {
       ctl: 0,
@@ -163,12 +215,18 @@ export const GET: APIRoute = async ({ request, locals }) => {
         ctl: current.ctl,
         atl: current.atl,
         tsb: current.tsb,
-        // Added stats
+        // Detailed stats
         weekKm,
         weekDays,
         monthKm,
         yearKm,
         yearDays,
+        // Weekly comparison
+        weeklyComparison: {
+          thisWeek: thisWeekDaily,
+          lastWeek: lastWeekDaily,
+          average: avgDailyDist,
+        },
       }),
       {
         headers: { 'Content-Type': 'application/json' },

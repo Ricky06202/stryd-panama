@@ -113,6 +113,11 @@ export function StrydBoardPage() {
     monthKm: 0,
     yearKm: 0,
     yearDays: 0,
+    weeklyComparison: {
+      thisWeek: [] as number[],
+      lastWeek: [] as number[],
+      average: 0,
+    },
   })
 
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
@@ -301,6 +306,11 @@ export function StrydBoardPage() {
           monthKm: data.monthKm,
           yearKm: data.yearKm,
           yearDays: data.yearDays,
+          weeklyComparison: data.weeklyComparison || {
+            thisWeek: [],
+            lastWeek: [],
+            average: 0,
+          },
         }))
       }
     } catch (error) {
@@ -329,10 +339,13 @@ export function StrydBoardPage() {
     if (view === 'performance' && currentUserId && profile.stravaConnected) {
       fetchMetrics()
     }
-    if (view === 'performance' && currentUserId) {
+  }, [view, currentUserId, profile.stravaConnected])
+
+  useEffect(() => {
+    if (currentUserId) {
       fetchCoachMessages()
     }
-  }, [view, currentUserId, profile.stravaConnected])
+  }, [currentUserId])
 
   useEffect(() => {
     // Detect if we just connected Strava
@@ -488,6 +501,12 @@ export function StrydBoardPage() {
             <p className="text-gray-400 font-medium">
               Analiza tu potencia, fatiga y progreso semanal.
             </p>
+            {profile.coachMessages.length > 0 && (
+              <div className="absolute top-4 right-4 flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase animate-pulse">
+                <MessageSquare className="w-3 h-3" />
+                {profile.coachMessages.length} Mensajes
+              </div>
+            )}
           </button>
         </div>
       </div>
@@ -580,39 +599,41 @@ export function StrydBoardPage() {
             </div>
 
             {/* Custom Premium Tabs */}
-            <div className="flex border-b border-gray-800 mb-8">
-              {['Estadísticas', 'Organizaciones', 'Objetivos'].map((tab) => {
-                const isActive =
-                  profileTab ===
-                  tab
-                    .toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                return (
-                  <button
-                    key={tab}
-                    onClick={() =>
-                      setProfileTab(
-                        tab
-                          .toLowerCase()
-                          .normalize('NFD')
-                          .replace(/[\u0300-\u036f]/g, ''),
-                      )
-                    }
-                    className={cn(
-                      'px-6 py-4 text-lg font-black transition-all relative',
-                      isActive
-                        ? 'text-white'
-                        : 'text-gray-500 hover:text-gray-300',
-                    )}
-                  >
-                    {tab}
-                    {isActive && (
-                      <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500 rounded-t-full shadow-[0_-4px_10px_rgba(249,115,22,0.5)]" />
-                    )}
-                  </button>
-                )
-              })}
+            <div className="flex border-b border-gray-800 mb-8 overflow-x-auto">
+              {['Estadísticas', 'Coach', 'Organizaciones', 'Objetivos'].map(
+                (tab) => {
+                  const isActive =
+                    profileTab ===
+                    tab
+                      .toLowerCase()
+                      .normalize('NFD')
+                      .replace(/[\u0300-\u036f]/g, '')
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() =>
+                        setProfileTab(
+                          tab
+                            .toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, ''),
+                        )
+                      }
+                      className={cn(
+                        'px-6 py-4 text-lg font-black transition-all relative',
+                        isActive
+                          ? 'text-white'
+                          : 'text-gray-500 hover:text-gray-300',
+                      )}
+                    >
+                      {tab}
+                      {isActive && (
+                        <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500 rounded-t-full shadow-[0_-4px_10px_rgba(249,115,22,0.5)]" />
+                      )}
+                    </button>
+                  )
+                },
+              )}
             </div>
           </div>
 
@@ -653,6 +674,66 @@ export function StrydBoardPage() {
                     />
                   )}
                   <PRCard isAdd onClick={() => setView('profile')} />
+                </div>
+              </div>
+            )}
+
+            {profileTab === 'coach' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-3xl">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-black flex items-center gap-3">
+                    <span className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
+                      <MessageSquare className="w-8 h-8" />
+                    </span>
+                    TABLÓN DEL <span className="text-blue-500">COACH</span>
+                  </h3>
+                  {profile.coachMessages.length > 0 && (
+                    <span className="px-3 py-1 bg-gray-800 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                      {profile.coachMessages.length} Mensajes totales
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  {profile.coachMessages.length === 0 ? (
+                    <div className="text-center py-20 bg-gray-900/50 rounded-3xl border border-dashed border-gray-800">
+                      <div className="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-gray-600">
+                        <MessageSquare className="w-8 h-8" />
+                      </div>
+                      <p className="text-gray-500 font-bold uppercase tracking-widest italic">
+                        No hay mensajes nuevos del coach.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="relative border-l-2 border-blue-500/20 ml-4 pl-8 space-y-12">
+                      {profile.coachMessages.map((msg: any) => (
+                        <div key={msg.id} className="relative">
+                          <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] border-4 border-black"></div>
+                          <div className="bg-gray-900 border border-gray-800 p-8 rounded-3xl hover:border-blue-500/30 transition-all group">
+                            <div className="flex justify-between items-center mb-6">
+                              <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                Coach Direct
+                              </span>
+                              <span className="text-[10px] text-gray-500 font-bold uppercase">
+                                {new Date(
+                                  Number(msg.createdAt) * 1000,
+                                ).toLocaleDateString('es-PA', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                            <p className="text-xl text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
+                              {msg.content}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1348,6 +1429,262 @@ export function StrydBoardPage() {
               </div>
             </div>
 
+            {/* Weekly Performance Comparison (Image Reference) */}
+            <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl mb-12">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                  <h2 className="text-3xl font-black tracking-tight mb-1">
+                    Total
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-6 mt-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 bg-yellow-400 rounded-full shadow-[0_0_10px_rgba(250,204,21,0.3)]"></div>
+                      <span className="text-gray-400 text-sm font-bold">
+                        Semana anterior
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 bg-[#4ade80] rounded-full shadow-[0_0_10px_rgba(74,222,128,0.3)]"></div>
+                      <span className="text-gray-400 text-sm font-bold">
+                        Esta semana
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 bg-[#4ade80] rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-[#4ade80] rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-[#4ade80] rounded-full"></div>
+                      </div>
+                      <span className="text-gray-400 text-sm font-bold">
+                        Media
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-[400px] w-full relative">
+                {isLoadingMetrics ? (
+                  <div className="h-full flex items-center justify-center">
+                    <Loader2 className="w-12 h-12 text-green-500 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="h-full w-full">
+                    {/* Y-axis labels manually to match the clean style or via Recharts */}
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={[
+                          {
+                            day: 'l',
+                            last:
+                              performanceStats.weeklyComparison.lastWeek[0] ||
+                              0,
+                            current:
+                              performanceStats.weeklyComparison.thisWeek[0] ||
+                              0,
+                          },
+                          {
+                            day: 'm',
+                            last:
+                              performanceStats.weeklyComparison.lastWeek[1] ||
+                              0,
+                            current:
+                              performanceStats.weeklyComparison.thisWeek[1] ||
+                              0,
+                          },
+                          {
+                            day: 'm',
+                            last:
+                              performanceStats.weeklyComparison.lastWeek[2] ||
+                              0,
+                            current:
+                              performanceStats.weeklyComparison.thisWeek[2] ||
+                              0,
+                          },
+                          {
+                            day: 'j',
+                            last:
+                              performanceStats.weeklyComparison.lastWeek[3] ||
+                              0,
+                            current:
+                              performanceStats.weeklyComparison.thisWeek[3] ||
+                              0,
+                          },
+                          {
+                            day: 'v',
+                            last:
+                              performanceStats.weeklyComparison.lastWeek[4] ||
+                              0,
+                            current:
+                              performanceStats.weeklyComparison.thisWeek[4] ||
+                              0,
+                          },
+                          {
+                            day: 's',
+                            last:
+                              performanceStats.weeklyComparison.lastWeek[5] ||
+                              0,
+                            current:
+                              performanceStats.weeklyComparison.thisWeek[5] ||
+                              0,
+                          },
+                          {
+                            day: 'd',
+                            last:
+                              performanceStats.weeklyComparison.lastWeek[6] ||
+                              0,
+                            current:
+                              performanceStats.weeklyComparison.thisWeek[6] ||
+                              0,
+                          },
+                        ]}
+                        margin={{ top: 40, right: 30, left: -20, bottom: 20 }}
+                        barGap={8}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="0"
+                          stroke="#374151"
+                          vertical={false}
+                          horizontal={true}
+                        />
+                        <XAxis
+                          dataKey="day"
+                          stroke="#9ca3af"
+                          fontSize={18}
+                          fontWeight="bold"
+                          tickLine={false}
+                          axisLine={false}
+                          dy={15}
+                        />
+                        <YAxis
+                          stroke="#9ca3af"
+                          fontSize={16}
+                          fontWeight="bold"
+                          tickLine={false}
+                          axisLine={false}
+                          domain={[0, 'dataMax + 5']}
+                          ticks={[5, 10, 15]}
+                        />
+                        <Tooltip
+                          cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              return (
+                                <div className="bg-gray-800 border border-gray-700 p-4 rounded-2xl shadow-2xl">
+                                  <p className="text-white font-black uppercase text-xs mb-2">{`Día ${payload[0].payload.day.toUpperCase()}`}</p>
+                                  {payload.map((entry: any, index: number) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <div
+                                        className="w-2 h-2 rounded-full"
+                                        style={{ backgroundColor: entry.color }}
+                                      ></div>
+                                      <span className="text-gray-400 text-[10px] font-bold uppercase">
+                                        {entry.name}:
+                                      </span>
+                                      <span className="text-white font-black">
+                                        {entry.value} km
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )
+                            }
+                            return null
+                          }}
+                        />
+                        {/* Reference Line for Average */}
+                        <Line
+                          type="monotone"
+                          dataKey={() =>
+                            performanceStats.weeklyComparison.average
+                          }
+                          stroke="#4ade80"
+                          strokeWidth={3}
+                          strokeDasharray="8 8"
+                          dot={false}
+                          isAnimationActive={false}
+                        />
+                        <Bar
+                          dataKey="last"
+                          name="Semana anterior"
+                          fill="#facc15"
+                          radius={[10, 10, 0, 0]}
+                          barSize={32}
+                          label={({ x, y, width, value }: any) => {
+                            if (value === 0 || value < 10) return null // Only show top label for large values like in image
+                            return (
+                              <g>
+                                <rect
+                                  x={x + width / 2 - 35}
+                                  y={y - 45}
+                                  width={70}
+                                  height={35}
+                                  rx={17}
+                                  fill="#facc15"
+                                />
+                                <text
+                                  x={x + width / 2}
+                                  y={y - 23}
+                                  fill="black"
+                                  textAnchor="middle"
+                                  fontSize={14}
+                                  fontWeight="black"
+                                >
+                                  {value}km
+                                </text>
+                              </g>
+                            )
+                          }}
+                        />
+                        <Bar
+                          dataKey="current"
+                          name="Esta semana"
+                          fill="#4ade80"
+                          radius={[10, 10, 0, 0]}
+                          barSize={32}
+                          label={({ x, y, width, value }: any) => {
+                            if (value === 0) return null
+                            return (
+                              <g>
+                                <rect
+                                  x={x + width / 2 - 35}
+                                  y={y - 45}
+                                  width={78}
+                                  height={35}
+                                  rx={17}
+                                  fill="#4ade80"
+                                />
+                                <text
+                                  x={x + width / 2}
+                                  y={y - 23}
+                                  fill="black"
+                                  textAnchor="middle"
+                                  fontSize={14}
+                                  fontWeight="black"
+                                >
+                                  {value}km
+                                </text>
+                                <path
+                                  d={`M${x + width / 2} ${y - 12} L${x + width / 2 - 6} ${y - 20} L${x + width / 2 + 6} ${y - 20} Z`}
+                                  fill="#4ade80"
+                                />
+                              </g>
+                            )
+                          }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                    <div className="absolute left-0 bottom-[-10px] text-gray-500 font-bold text-sm">
+                      km
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+
             <Tabs defaultValue="power" className="space-y-8">
               <TabsList className="bg-gray-900 border border-gray-800 p-1.5 rounded-2xl w-full max-w-md">
                 <TabsTrigger
@@ -1447,65 +1784,6 @@ export function StrydBoardPage() {
                 </Card>
               </TabsContent>
             </Tabs>
-
-            {/* Coach Message Board */}
-            <div className="mt-12">
-              <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl relative">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <svg
-                    className="w-24 h-24"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
-                  </svg>
-                </div>
-
-                <h2 className="text-3xl font-black mb-8 flex items-center gap-3">
-                  <span className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
-                    <MessageSquare className="w-8 h-8" />
-                  </span>
-                  TABLÓN DEL <span className="text-blue-500">COACH</span>
-                </h2>
-
-                <div className="space-y-6">
-                  {profile.coachMessages.length === 0 ? (
-                    <div className="text-center py-12 bg-black/20 rounded-2xl border border-dashed border-gray-800">
-                      <p className="text-gray-500 font-bold uppercase tracking-widest italic">
-                        No hay mensajes nuevos del coach en este momento.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-6">
-                      {profile.coachMessages.map((msg: any) => (
-                        <div
-                          key={msg.id}
-                          className="group bg-gray-800/40 border border-gray-800 p-6 rounded-2xl transition-all hover:bg-gray-800/60 hover:border-blue-500/30"
-                        >
-                          <div className="flex justify-between items-start mb-4">
-                            <span className="px-3 py-1 bg-blue-500/10 text-blue-500 text-[10px] font-black uppercase tracking-widest rounded-full">
-                              Mensaje del Coach
-                            </span>
-                            <span className="text-[10px] text-gray-500 font-bold uppercase">
-                              {new Date(
-                                Number(msg.createdAt) * 1000,
-                              ).toLocaleDateString('es-PA', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                              })}
-                            </span>
-                          </div>
-                          <p className="text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
-                            {msg.content}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </div>
 
             {/* Insights and Objectives hidden until we have real data feed */}
           </>
