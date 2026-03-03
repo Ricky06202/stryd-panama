@@ -118,6 +118,7 @@ export function StrydBoardPage() {
       lastWeek: [] as number[],
       average: 0,
     },
+    rampRate: 0,
   })
 
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
@@ -311,6 +312,7 @@ export function StrydBoardPage() {
             lastWeek: [],
             average: 0,
           },
+          rampRate: data.rampRate || 0,
         }))
       }
     } catch (error) {
@@ -332,6 +334,32 @@ export function StrydBoardPage() {
       }
     } catch (error) {
       console.error('Error fetching coach messages:', error)
+    }
+  }
+
+  const getRampStatus = (value: number) => {
+    if (value <= 2)
+      return {
+        label: 'Mantenimiento',
+        color: 'text-blue-400',
+        bg: 'bg-blue-500/10',
+      }
+    if (value <= 5)
+      return {
+        label: 'Crecimiento Óptimo',
+        color: 'text-green-400',
+        bg: 'bg-green-500/10',
+      }
+    if (value <= 8)
+      return {
+        label: 'Crecimiento Agresivo',
+        color: 'text-orange-400',
+        bg: 'bg-orange-500/10',
+      }
+    return {
+      label: 'Zona de Peligro',
+      color: 'text-red-400',
+      bg: 'bg-red-500/10',
     }
   }
 
@@ -1367,7 +1395,7 @@ export function StrydBoardPage() {
                 </span>
                 ESTADÍSTICAS ADICIONALES
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
                 {[
                   {
                     label: 'KM X SEMANA',
@@ -1405,10 +1433,17 @@ export function StrydBoardPage() {
                     icon: <Calendar className="w-4 h-4" />,
                     color: 'text-red-400',
                   },
+                  {
+                    label: 'RAMPA',
+                    value: performanceStats.rampRate,
+                    status: getRampStatus(performanceStats.rampRate),
+                    icon: <TrendingUp className="w-4 h-4" />,
+                    color: getRampStatus(performanceStats.rampRate).color,
+                  },
                 ].map((stat, i) => (
                   <Card
                     key={i}
-                    className="bg-gray-900 border-gray-800 p-4 rounded-xl hover:border-gray-700 transition-all text-center"
+                    className="bg-gray-900 border-gray-800 p-4 rounded-xl hover:border-gray-700 transition-all text-center flex flex-col items-center justify-between"
                   >
                     <div
                       className={cn(
@@ -1418,12 +1453,25 @@ export function StrydBoardPage() {
                     >
                       {stat.icon}
                     </div>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
-                      {stat.label}
-                    </p>
-                    <span className="text-xl font-black text-white">
-                      {stat.value}
-                    </span>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
+                        {stat.label}
+                      </p>
+                      <span className="text-xl font-black text-white">
+                        {stat.value}
+                      </span>
+                      {stat.status && (
+                        <div
+                          className={cn(
+                            'mt-2 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter',
+                            stat.status.bg,
+                            stat.status.color,
+                          )}
+                        >
+                          {stat.status.label}
+                        </div>
+                      )}
+                    </div>
                   </Card>
                 ))}
               </div>

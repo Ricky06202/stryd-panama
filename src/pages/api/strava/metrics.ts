@@ -185,7 +185,14 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const thisWeekDaily = getWeekData(currentMonday)
     const lastWeekDaily = getWeekData(lastMonday)
 
-    // Calculate Average (historical average of daily distance or average of these two weeks?)
+    // Calculate Ramp Rate (CTL today - CTL 7 days ago)
+    // metrics contains DayStats[] for the last 90 days
+    const currentCTL = metrics[metrics.length - 1]?.ctl || 0
+    const sevenDaysAgoStats = metrics[metrics.length - 8] || metrics[0] // Fallback to first if less than 7 days
+    const rampRate =
+      Math.round((currentCTL - (sevenDaysAgoStats?.ctl || 0)) * 10) / 10
+
+    // Calculate Average (historical average of daily distance)
     // Image shows "Media" dashed line. Let's do average of all active days in the last 30 days.
     const thirtyDaysAgo = new Date(todayPanama)
     thirtyDaysAgo.setDate(todayPanama.getDate() - 30)
@@ -227,6 +234,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
           lastWeek: lastWeekDaily,
           average: avgDailyDist,
         },
+        rampRate,
       }),
       {
         headers: { 'Content-Type': 'application/json' },
