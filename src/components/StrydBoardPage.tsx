@@ -124,6 +124,7 @@ export function StrydBoardPage() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const [loginError, setLoginError] = useState<string | null>(null)
   const [profileTab, setProfileTab] = useState('estadisticas')
+  const [showHistory, setShowHistory] = useState(false)
 
   const todayStr = useMemo(() => {
     return new Date().toLocaleDateString('es-PA', {
@@ -1475,89 +1476,137 @@ export function StrydBoardPage() {
               </div>
             </div>
 
-            {/* Coach Message Board */}
             <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-black flex items-center gap-3 uppercase tracking-tight">
+                <div className="flex items-center gap-3">
                   <span className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
                     <MessageSquare className="w-8 h-8" />
                   </span>
-                  TABLÓN DEL <span className="text-blue-500">COACH</span>
-                </h2>
-                {profile.coachMessages.length > 0 && (
-                  <span className="px-3 py-1 bg-gray-800 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    {profile.coachMessages.length} Mensajes totales
-                  </span>
-                )}
+                  <h2 className="text-2xl font-black uppercase tracking-tight">
+                    TABLÓN DEL <span className="text-blue-500">COACH</span>
+                  </h2>
+                </div>
+                <div className="flex items-center gap-3">
+                  {profile.coachMessages.length > 0 && (
+                    <button
+                      onClick={() => setShowHistory(!showHistory)}
+                      className={cn(
+                        'px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border',
+                        showHistory
+                          ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
+                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600',
+                      )}
+                    >
+                      {showHistory ? 'Ocultar Historial' : 'Ver Historial'}
+                    </button>
+                  )}
+                  {profile.coachMessages.filter((m) => !m.isRead).length >
+                    0 && (
+                    <span className="px-3 py-1 bg-blue-500/20 text-blue-500 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
+                      {profile.coachMessages.filter((m) => !m.isRead).length}{' '}
+                      Nuevos
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-6">
-                {profile.coachMessages.length === 0 ? (
+                {(showHistory
+                  ? profile.coachMessages
+                  : profile.coachMessages.filter((msg: any) => !msg.isRead)
+                ).length === 0 ? (
                   <div className="text-center py-16 bg-gray-900/50 rounded-3xl border border-dashed border-gray-800">
                     <div className="w-12 h-12 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-600">
                       <MessageSquare className="w-6 h-6" />
                     </div>
                     <p className="text-gray-500 font-bold uppercase tracking-widest italic text-sm">
-                      No hay mensajes nuevos del coach.
+                      {showHistory
+                        ? 'No hay historial de mensajes.'
+                        : 'No hay mensajes nuevos del coach.'}
                     </p>
                   </div>
                 ) : (
                   <div className="relative border-l-2 border-blue-500/20 ml-4 pl-8 space-y-8">
-                    {profile.coachMessages
-                      .filter((msg: any) => !msg.isRead)
-                      .slice(0, 5)
-                      .map((msg: any) => (
-                        <div key={msg.id} className="relative">
-                          <div className="absolute -left-10 top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] border-4 border-black"></div>
-                          <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl hover:border-blue-500/30 transition-all group">
-                            <div className="flex justify-between items-center mb-4">
-                              <div className="flex items-center gap-3">
-                                <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
-                                  Coach Direct
-                                </span>
+                    {(showHistory
+                      ? profile.coachMessages
+                      : profile.coachMessages.filter((msg: any) => !msg.isRead)
+                    ).map((msg: any) => (
+                      <div
+                        key={msg.id}
+                        className={cn(
+                          'relative transition-all duration-500',
+                          msg.isRead && !showHistory
+                            ? 'opacity-0 scale-95 h-0 overflow-hidden'
+                            : 'opacity-100 scale-100',
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'absolute -left-10 top-0 w-4 h-4 rounded-full border-4 border-black transition-all',
+                            msg.isRead
+                              ? 'bg-gray-700'
+                              : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]',
+                          )}
+                        ></div>
+                        <div
+                          className={cn(
+                            'bg-gray-900 border p-6 rounded-3xl transition-all group',
+                            msg.isRead
+                              ? 'border-gray-800 opacity-60'
+                              : 'border-gray-800 hover:border-blue-500/30',
+                          )}
+                        >
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-3">
+                              <span
+                                className={cn(
+                                  'px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest',
+                                  msg.isRead
+                                    ? 'bg-gray-800 text-gray-500'
+                                    : 'bg-blue-500/10 text-blue-500',
+                                )}
+                              >
+                                {msg.isRead ? 'Archivado' : 'Coach Direct'}
+                              </span>
+                              {!msg.isRead && (
                                 <button
                                   onClick={() => handleMarkRead(msg.id)}
                                   className="text-[10px] text-gray-500 hover:text-blue-400 font-bold uppercase tracking-wider transition-colors flex items-center gap-1 bg-white/5 hover:bg-white/10 px-2 py-1 rounded-md"
                                 >
                                   Entendido / Leído
                                 </button>
-                              </div>
-                              <span className="text-[10px] text-gray-500 font-bold uppercase">
-                                {(() => {
-                                  if (!msg.createdAt) return 'Fecha desconocida'
-                                  let date = new Date(msg.createdAt)
-                                  if (isNaN(date.getTime())) {
-                                    const ts = Number(msg.createdAt)
-                                    if (!isNaN(ts)) {
-                                      date = new Date(
-                                        ts * (ts < 10000000000 ? 1000 : 1),
-                                      )
-                                    }
-                                  }
-                                  return isNaN(date.getTime())
-                                    ? 'Fecha desconocida'
-                                    : date.toLocaleDateString('es-PA', {
-                                        day: 'numeric',
-                                        month: 'short',
-                                        year: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                      })
-                                })()}
-                              </span>
+                              )}
                             </div>
-                            <p className="text-lg text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
-                              {msg.content}
-                            </p>
+                            <span className="text-[10px] text-gray-500 font-bold uppercase">
+                              {(() => {
+                                if (!msg.createdAt) return 'Fecha desconocida'
+                                let date = new Date(msg.createdAt)
+                                if (isNaN(date.getTime())) {
+                                  const ts = Number(msg.createdAt)
+                                  if (!isNaN(ts)) {
+                                    date = new Date(
+                                      ts * (ts < 10000000000 ? 1000 : 1),
+                                    )
+                                  }
+                                }
+                                return isNaN(date.getTime())
+                                  ? 'Fecha desconocida'
+                                  : date.toLocaleDateString('es-PA', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })
+                              })()}
+                            </span>
                           </div>
+                          <p className="text-lg text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
+                            {msg.content}
+                          </p>
                         </div>
-                      ))}
-                    {profile.coachMessages.filter((msg: any) => !msg.isRead)
-                      .length === 0 && (
-                      <p className="text-gray-500 italic text-sm py-4">
-                        No hay mensajes pendientes del coach.
-                      </p>
-                    )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
