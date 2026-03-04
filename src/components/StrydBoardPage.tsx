@@ -337,6 +337,27 @@ export function StrydBoardPage() {
     }
   }
 
+  const handleMarkRead = async (messageId: number) => {
+    try {
+      const response = await fetch('/api/coach/messages/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId }),
+      })
+
+      if (response.ok) {
+        setProfile((prev) => ({
+          ...prev,
+          coachMessages: prev.coachMessages.map((msg) =>
+            msg.id === messageId ? { ...msg, isRead: true } : msg,
+          ),
+        }))
+      }
+    } catch (error) {
+      console.error('Error marking message as read:', error)
+    }
+  }
+
   const getRampStatus = (value: number) => {
     if (value <= 2)
       return {
@@ -1478,38 +1499,55 @@ export function StrydBoardPage() {
                   </div>
                 ) : (
                   <div className="relative border-l-2 border-blue-500/20 ml-4 pl-8 space-y-8">
-                    {profile.coachMessages.slice(0, 5).map((msg: any) => (
-                      <div key={msg.id} className="relative">
-                        <div className="absolute -left-10 top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] border-4 border-black"></div>
-                        <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl hover:border-blue-500/30 transition-all group">
-                          <div className="flex justify-between items-center mb-4">
-                            <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
-                              Coach Direct
-                            </span>
-                            <span className="text-[10px] text-gray-500 font-bold uppercase">
-                              {(() => {
-                                const ts = Number(msg.createdAt)
-                                const date = new Date(
-                                  ts * (ts < 10000000000 ? 1000 : 1),
-                                )
-                                return isNaN(date.getTime())
-                                  ? 'Fecha desconocida'
-                                  : date.toLocaleDateString('es-PA', {
-                                      day: 'numeric',
-                                      month: 'short',
-                                      year: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })
-                              })()}
-                            </span>
+                    {profile.coachMessages
+                      .filter((msg: any) => !msg.isRead)
+                      .slice(0, 5)
+                      .map((msg: any) => (
+                        <div key={msg.id} className="relative">
+                          <div className="absolute -left-10 top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] border-4 border-black"></div>
+                          <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl hover:border-blue-500/30 transition-all group">
+                            <div className="flex justify-between items-center mb-4">
+                              <div className="flex items-center gap-3">
+                                <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                  Coach Direct
+                                </span>
+                                <button
+                                  onClick={() => handleMarkRead(msg.id)}
+                                  className="text-[10px] text-gray-500 hover:text-blue-400 font-bold uppercase tracking-wider transition-colors flex items-center gap-1 bg-white/5 hover:bg-white/10 px-2 py-1 rounded-md"
+                                >
+                                  Entendido / Leído
+                                </button>
+                              </div>
+                              <span className="text-[10px] text-gray-500 font-bold uppercase">
+                                {(() => {
+                                  const ts = Number(msg.createdAt)
+                                  const date = new Date(
+                                    ts * (ts < 10000000000 ? 1000 : 1),
+                                  )
+                                  return isNaN(date.getTime())
+                                    ? 'Fecha desconocida'
+                                    : date.toLocaleDateString('es-PA', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })
+                                })()}
+                              </span>
+                            </div>
+                            <p className="text-lg text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
+                              {msg.content}
+                            </p>
                           </div>
-                          <p className="text-lg text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
-                            {msg.content}
-                          </p>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    {profile.coachMessages.filter((msg: any) => !msg.isRead)
+                      .length === 0 && (
+                      <p className="text-gray-500 italic text-sm py-4">
+                        No hay mensajes pendientes del coach.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -1864,6 +1902,127 @@ export function StrydBoardPage() {
                             radius={[6, 6, 0, 0]}
                           />
                         </BarChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="fatigue">
+                <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl">
+                  <CardTitle className="mb-4 flex items-center gap-3 text-red-500 font-black">
+                    <div className="w-2 h-8 bg-red-500 rounded-full"></div>
+                    GESTIÓN DE FATIGA (ATL vs TSB)
+                  </CardTitle>
+                  <p className="text-gray-400 mb-8 text-sm font-medium">
+                    Analiza cómo tu cansancio acumulado (rojo) influye en tu
+                    frescura para competir (área inferior).
+                  </p>
+                  <div className="h-[400px] w-full">
+                    {isLoadingMetrics ? (
+                      <div className="h-full flex items-center justify-center">
+                        <Loader2 className="w-12 h-12 text-red-500 animate-spin" />
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={metrics.slice(-30)}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient
+                              id="colorAtl"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="5%"
+                                stopColor="#ef4444"
+                                stopOpacity={0.3}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor="#ef4444"
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                            <linearGradient
+                              id="colorTsb"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="5%"
+                                stopColor="#10b981"
+                                stopOpacity={0.2}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor="#10b981"
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="#1f2937"
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="date"
+                            stroke="#6b7280"
+                            fontSize={12}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(str) => {
+                              const d = new Date(str + 'T00:00:00')
+                              return d.toLocaleDateString('es-PA', {
+                                day: 'numeric',
+                                month: 'short',
+                              })
+                            }}
+                          />
+                          <YAxis
+                            stroke="#6b7280"
+                            fontSize={12}
+                            tickLine={false}
+                            axisLine={false}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#111827',
+                              border: '1px solid #374151',
+                              borderRadius: '12px',
+                            }}
+                            labelStyle={{
+                              color: '#9ca3af',
+                              fontWeight: 'bold',
+                              marginBottom: '8px',
+                            }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="atl"
+                            name="Fatiga (ATL)"
+                            stroke="#ef4444"
+                            strokeWidth={3}
+                            fillOpacity={1}
+                            fill="url(#colorAtl)"
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="tsb"
+                            name="Balance (TSB)"
+                            stroke="#10b981"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#colorTsb)"
+                          />
+                        </AreaChart>
                       </ResponsiveContainer>
                     )}
                   </div>

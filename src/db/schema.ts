@@ -152,6 +152,7 @@ export const coachMessages = sqliteTable('coach_messages', {
     .references(() => users.id)
     .notNull(),
   content: text('content').notNull(),
+  isRead: integer('is_read', { mode: 'boolean' }).default(false),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
     sql`(strftime('%s', 'now'))`,
   ),
