@@ -672,170 +672,14 @@ export function StrydBoardPage() {
               </button>
             </div>
 
-            {/* Custom Premium Tabs */}
-            <div className="flex border-b border-gray-800 mb-8 overflow-x-auto">
-              {['Estadísticas', 'Coach', 'Organizaciones', 'Objetivos'].map(
-                (tab) => {
-                  const isActive =
-                    profileTab ===
-                    tab
-                      .toLowerCase()
-                      .normalize('NFD')
-                      .replace(/[\u0300-\u036f]/g, '')
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() =>
-                        setProfileTab(
-                          tab
-                            .toLowerCase()
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, ''),
-                        )
-                      }
-                      className={cn(
-                        'px-6 py-4 text-lg font-black transition-all relative',
-                        isActive
-                          ? 'text-white'
-                          : 'text-gray-500 hover:text-gray-300',
-                      )}
-                    >
-                      {tab}
-                      {isActive && (
-                        <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500 rounded-t-full shadow-[0_-4px_10px_rgba(249,115,22,0.5)]" />
-                      )}
-                    </button>
-                  )
-                },
-              )}
-            </div>
+            {/* Premium Header is enough, we remove the tabs */}
           </div>
 
           <div className="space-y-12">
-            {profileTab === 'estadisticas' && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h3 className="text-2xl font-black mb-8 flex items-center gap-3">
-                  Mejores marcas personales
-                </h3>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-10 gap-x-6 items-start">
-                  {profile.record5k && (
-                    <PRCard
-                      distance="5km"
-                      time={profile.record5k}
-                      location="Pese"
-                    />
-                  )}
-                  {profile.record10k && (
-                    <PRCard
-                      distance="10km"
-                      time={profile.record10k}
-                      location="Pese"
-                    />
-                  )}
-                  {profile.record21k && (
-                    <PRCard
-                      distance="21.1km"
-                      time={profile.record21k}
-                      location="Chicago"
-                    />
-                  )}
-                  {profile.record42k && (
-                    <PRCard
-                      distance="42.2km"
-                      time={profile.record42k}
-                      location="Maratón"
-                    />
-                  )}
-                  <PRCard isAdd onClick={() => setView('profile')} />
-                </div>
-              </div>
-            )}
-
-            {profileTab === 'coach' && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-3xl">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-2xl font-black flex items-center gap-3">
-                    <span className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
-                      <MessageSquare className="w-8 h-8" />
-                    </span>
-                    TABLÓN DEL <span className="text-blue-500">COACH</span>
-                  </h3>
-                  {profile.coachMessages.length > 0 && (
-                    <span className="px-3 py-1 bg-gray-800 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                      {profile.coachMessages.length} Mensajes totales
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-6">
-                  {profile.coachMessages.length === 0 ? (
-                    <div className="text-center py-20 bg-gray-900/50 rounded-3xl border border-dashed border-gray-800">
-                      <div className="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-gray-600">
-                        <MessageSquare className="w-8 h-8" />
-                      </div>
-                      <p className="text-gray-500 font-bold uppercase tracking-widest italic">
-                        No hay mensajes nuevos del coach.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="relative border-l-2 border-blue-500/20 ml-4 pl-8 space-y-12">
-                      {profile.coachMessages.map((msg: any) => (
-                        <div key={msg.id} className="relative">
-                          <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] border-4 border-black"></div>
-                          <div className="bg-gray-900 border border-gray-800 p-8 rounded-3xl hover:border-blue-500/30 transition-all group">
-                            <div className="flex justify-between items-center mb-6">
-                              <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
-                                Coach Direct
-                              </span>
-                              <span className="text-[10px] text-gray-500 font-bold uppercase">
-                                {new Date(
-                                  Number(msg.createdAt) * 1000,
-                                ).toLocaleDateString('es-PA', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </span>
-                            </div>
-                            <p className="text-xl text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
-                              {msg.content}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Placeholder for other tabs */}
-            {(profileTab === 'organizaciones' ||
-              profileTab === 'objetivos') && (
-              <div className="py-20 text-center animate-in fade-in duration-500">
-                <p className="text-gray-500 font-bold uppercase tracking-widest italic">
-                  Próximamente...
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Original Form hidden or simplified? The user wants the aesthetic. 
-              Maybe keep the original form as a fallback or in another section.
-              Actually, I'll keep the original save functionality but integrate it better.
-              For now, I'll keep the "viejos" cards but replace them logic-wise.
-          */}
-
-          <div className="mt-20 pt-10 border-t border-gray-800 opacity-50 hover:opacity-100 transition-opacity">
-            <p className="text-xs text-center text-gray-600 font-bold uppercase tracking-widest mb-10">
-              Panel de Configuración Detallada
-            </p>
+            {/* The form is the main content now */}
             <form
               onSubmit={handleSaveProfile}
-              className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+              className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
             >
               {/* Columna Izquierda: Foto e Info Básica */}
               <div className="space-y-6">
@@ -1563,6 +1407,107 @@ export function StrydBoardPage() {
                 </Card>
               )
             })()}
+
+            {/* Personal Records (PRs) */}
+            <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <h2 className="text-2xl font-black mb-8 flex items-center gap-3 uppercase tracking-tight">
+                <span className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
+                  🏆
+                </span>
+                Mejores marcas personales
+              </h2>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-10 gap-x-6 items-start">
+                {profile.record5k && (
+                  <PRCard
+                    distance="5km"
+                    time={profile.record5k}
+                    location="Pese"
+                  />
+                )}
+                {profile.record10k && (
+                  <PRCard
+                    distance="10km"
+                    time={profile.record10k}
+                    location="Pese"
+                  />
+                )}
+                {profile.record21k && (
+                  <PRCard
+                    distance="21.1km"
+                    time={profile.record21k}
+                    location="Chicago"
+                  />
+                )}
+                {profile.record42k && (
+                  <PRCard
+                    distance="42.2km"
+                    time={profile.record42k}
+                    location="Maratón"
+                  />
+                )}
+                <PRCard isAdd onClick={() => setView('profile')} />
+              </div>
+            </div>
+
+            {/* Coach Message Board */}
+            <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black flex items-center gap-3 uppercase tracking-tight">
+                  <span className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
+                    <MessageSquare className="w-8 h-8" />
+                  </span>
+                  TABLÓN DEL <span className="text-blue-500">COACH</span>
+                </h2>
+                {profile.coachMessages.length > 0 && (
+                  <span className="px-3 py-1 bg-gray-800 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    {profile.coachMessages.length} Mensajes totales
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-6">
+                {profile.coachMessages.length === 0 ? (
+                  <div className="text-center py-16 bg-gray-900/50 rounded-3xl border border-dashed border-gray-800">
+                    <div className="w-12 h-12 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-600">
+                      <MessageSquare className="w-6 h-6" />
+                    </div>
+                    <p className="text-gray-500 font-bold uppercase tracking-widest italic text-sm">
+                      No hay mensajes nuevos del coach.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="relative border-l-2 border-blue-500/20 ml-4 pl-8 space-y-8">
+                    {profile.coachMessages.slice(0, 5).map((msg: any) => (
+                      <div key={msg.id} className="relative">
+                        <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] border-4 border-black"></div>
+                        <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl hover:border-blue-500/30 transition-all group">
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                              Coach Direct
+                            </span>
+                            <span className="text-[10px] text-gray-500 font-bold uppercase">
+                              {new Date(
+                                Number(msg.createdAt) * 1000,
+                              ).toLocaleDateString('es-PA', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-lg text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
+                            {msg.content}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Weekly Performance Comparison (Image Reference) */}
             <Card className="bg-gray-900 border-gray-800 p-8 rounded-3xl overflow-hidden shadow-2xl mb-12">
