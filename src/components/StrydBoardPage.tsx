@@ -596,10 +596,14 @@ export function StrydBoardPage() {
             <p className="text-gray-400 font-medium">
               Analiza tu potencia, fatiga y progreso semanal.
             </p>
-            {profile.coachMessages.length > 0 && (
+            {profile.coachMessages.filter((msg: any) => !msg.isRead).length >
+              0 && (
               <div className="absolute top-4 right-4 flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase animate-pulse">
                 <MessageSquare className="w-3 h-3" />
-                {profile.coachMessages.length} Mensajes
+                {
+                  profile.coachMessages.filter((msg: any) => !msg.isRead).length
+                }{' '}
+                Mensajes
               </div>
             )}
           </button>
@@ -1520,10 +1524,16 @@ export function StrydBoardPage() {
                               </div>
                               <span className="text-[10px] text-gray-500 font-bold uppercase">
                                 {(() => {
-                                  const ts = Number(msg.createdAt)
-                                  const date = new Date(
-                                    ts * (ts < 10000000000 ? 1000 : 1),
-                                  )
+                                  if (!msg.createdAt) return 'Fecha desconocida'
+                                  let date = new Date(msg.createdAt)
+                                  if (isNaN(date.getTime())) {
+                                    const ts = Number(msg.createdAt)
+                                    if (!isNaN(ts)) {
+                                      date = new Date(
+                                        ts * (ts < 10000000000 ? 1000 : 1),
+                                      )
+                                    }
+                                  }
                                   return isNaN(date.getTime())
                                     ? 'Fecha desconocida'
                                     : date.toLocaleDateString('es-PA', {
