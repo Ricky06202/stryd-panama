@@ -49,7 +49,7 @@ export function PRCard({
         )}
       >
         {/* Top Icon section */}
-        <div className="flex-1 flex items-center justify-center py-4">
+        <div className="flex-1 flex items-center justify-center py-4 min-w-0 max-w-35">
           <div className="text-[#EF4444]">
             <svg
               viewBox="0 0 24 24"
@@ -62,28 +62,28 @@ export function PRCard({
         </div>
 
         {/* Banner with time - Ribbon style */}
-        <div className="relative w-[calc(100%+16px)] left-[-8px] h-10 flex items-center justify-center z-10">
+        <div className="relative w-[calc(100%+16px)] -left-2 h-10 flex items-center justify-center z-10">
           {/* Ribbon wings (underlay) */}
           <div
-            className="absolute left-0 top-[2px] w-4 h-8 bg-[#CC3333] -z-10"
+            className="absolute left-0 top-0.5 w-4 h-8 bg-[#CC3333] -z-10"
             style={{
               clipPath: 'polygon(100% 0, 100% 100%, 0 100%, 40% 50%, 0 0)',
             }}
           ></div>
           <div
-            className="absolute right-0 top-[2px] w-4 h-8 bg-[#CC3333] -z-10"
+            className="absolute right-0 top-0.5 w-4 h-8 bg-[#CC3333] -z-10"
             style={{
               clipPath: 'polygon(0 0, 100% 0, 60% 50%, 100% 100%, 0 100%)',
             }}
           ></div>
 
-          {/* Ribbon folding part (shadow/depth) */}
+          {/* Ribbon folding part (shadow/depth) - Fold effect */}
           <div
-            className="absolute left-2 bottom-[-4px] w-2 h-2 bg-[#992222] -z-10"
+            className="absolute left-2 -bottom-1 w-2 h-2 bg-[#992222] -z-10"
             style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }}
           ></div>
           <div
-            className="absolute right-2 bottom-[-4px] w-2 h-2 bg-[#992222] -z-10"
+            className="absolute right-2 -bottom-1 w-2 h-2 bg-[#992222] -z-10"
             style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}
           ></div>
 

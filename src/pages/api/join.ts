@@ -43,13 +43,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       .select()
       .from(users)
       .where(
-        sql`${users.email} = ${normalizedEmail} OR ${users.idCard} = ${idCard}`,
+        sql`LOWER(${users.email}) = ${normalizedEmail} OR ${users.idCard} = ${idCard}`,
       )
       .get()
 
     if (existingUser) {
       const field =
-        existingUser.email === normalizedEmail
+        existingUser.email.toLowerCase() === normalizedEmail
           ? 'El correo electrónico'
           : 'La cédula'
       return new Response(

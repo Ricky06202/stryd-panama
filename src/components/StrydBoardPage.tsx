@@ -1487,15 +1487,21 @@ export function StrydBoardPage() {
                               Coach Direct
                             </span>
                             <span className="text-[10px] text-gray-500 font-bold uppercase">
-                              {new Date(
-                                Number(msg.createdAt) * 1000,
-                              ).toLocaleDateString('es-PA', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                              {(() => {
+                                const ts = Number(msg.createdAt)
+                                const date = new Date(
+                                  ts * (ts < 10000000000 ? 1000 : 1),
+                                )
+                                return isNaN(date.getTime())
+                                  ? 'Fecha desconocida'
+                                  : date.toLocaleDateString('es-PA', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })
+                              })()}
                             </span>
                           </div>
                           <p className="text-lg text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">

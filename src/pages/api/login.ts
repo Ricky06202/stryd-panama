@@ -15,12 +15,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       )
     }
 
-    // Buscar usuario por email (normalizado a minúsculas)
-    const normalizedEmail = email.toLowerCase()
+    // Buscar usuario por email (insensible a mayúsculas para compatibilidad)
     const user = await db
       .select()
       .from(users)
-      .where(eq(users.email, normalizedEmail))
+      .where(sql`LOWER(${users.email}) = ${email.toLowerCase()}`)
       .get()
 
     if (!user) {

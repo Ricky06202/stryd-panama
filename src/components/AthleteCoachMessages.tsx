@@ -121,9 +121,15 @@ export function AthleteCoachMessages({ athleteId }: Props) {
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 <div className="mt-2 text-right">
                   <span className="text-[10px] text-muted-foreground font-bold uppercase">
-                    {new Date(Number(msg.createdAt) * 1000).toLocaleString(
-                      'es-PA',
-                    )}
+                    {(() => {
+                      const date = new Date(
+                        Number(msg.createdAt) *
+                          (Number(msg.createdAt) < 10000000000 ? 1000 : 1),
+                      )
+                      return isNaN(date.getTime())
+                        ? 'Fecha desconocida'
+                        : date.toLocaleString('es-PA')
+                    })()}
                   </span>
                 </div>
               </div>
