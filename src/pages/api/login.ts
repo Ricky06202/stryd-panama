@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro'
 import { getDb } from '../../db/client'
 import { users, userReviews } from '../../db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
