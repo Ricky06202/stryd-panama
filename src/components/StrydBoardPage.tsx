@@ -141,7 +141,7 @@ export function StrydBoardPage() {
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.toLowerCase(), password }),
       })
 
       const data = (await response.json()) as any
@@ -1480,7 +1480,7 @@ export function StrydBoardPage() {
                   <div className="relative border-l-2 border-blue-500/20 ml-4 pl-8 space-y-8">
                     {profile.coachMessages.slice(0, 5).map((msg: any) => (
                       <div key={msg.id} className="relative">
-                        <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] border-4 border-black"></div>
+                        <div className="absolute -left-10 top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] border-4 border-black"></div>
                         <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl hover:border-blue-500/30 transition-all group">
                           <div className="flex justify-between items-center mb-4">
                             <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
@@ -1757,7 +1757,7 @@ export function StrydBoardPage() {
                         />
                       </BarChart>
                     </ResponsiveContainer>
-                    <div className="absolute left-0 bottom-[-10px] text-gray-500 font-bold text-sm">
+                    <div className="absolute left-0 -bottom-2 text-gray-500 font-bold text-sm">
                       km
                     </div>
                   </div>

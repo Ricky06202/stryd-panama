@@ -38,15 +38,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // 1. Verificar si el usuario ya existe (por email o cédula)
     const idCard = formData.get('idCard') as string
+    const normalizedEmail = email.toLowerCase()
     const existingUser = await db
       .select()
       .from(users)
-      .where(sql`${users.email} = ${email} OR ${users.idCard} = ${idCard}`)
+      .where(
+        sql`${users.email} = ${normalizedEmail} OR ${users.idCard} = ${idCard}`,
+      )
       .get()
 
     if (existingUser) {
       const field =
-        existingUser.email === email ? 'El correo electrónico' : 'La cédula'
+        existingUser.email === normalizedEmail
+          ? 'El correo electrónico'
+          : 'La cédula'
       return new Response(
         JSON.stringify({
           error: `${field} ya está registrado en nuestro sistema.`,
@@ -63,7 +68,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       .insert(users)
       .values({
         fullName: fullName,
-        email: email,
+        email: normalizedEmail,
         idCard: formData.get('idCard') as string,
         phone: formData.get('phone') as string,
         password: formData.get('password') as string,
