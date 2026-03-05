@@ -1361,6 +1361,17 @@ export function StrydBoardPage() {
               ))}
             </div>
 
+            {/* Performance Chart */}
+            <div className="mb-10">
+              <h2 className="text-xl font-black mb-6 flex items-center gap-3">
+                <span className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
+                  <Activity className="w-5 h-5" />
+                </span>
+                GRÁFICA DE RENDIMIENTO
+              </h2>
+              <PerformanceChart data={metrics} ftp={ftp} />
+            </div>
+
             {/* New Statistics Grid */}
             <div className="mb-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
