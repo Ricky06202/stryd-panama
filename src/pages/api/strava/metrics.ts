@@ -12,6 +12,8 @@ import {
 export const GET: APIRoute = async ({ request, locals }) => {
   const url = new URL(request.url)
   const userId = url.searchParams.get('userId')
+  const reqMonth = url.searchParams.get('month')
+  const reqYear = url.searchParams.get('year')
 
   if (!userId) {
     return new Response(JSON.stringify({ error: 'Missing userId' }), {
@@ -112,13 +114,20 @@ export const GET: APIRoute = async ({ request, locals }) => {
       ),
     ).size
 
-    // Monthly stats (current calendar month)
-    const monthStart = new Date(currentYear, currentMonth, 1)
+    // Monthly stats (selected calendar month, fallback to current)
+    const targetMonth = reqMonth ? parseInt(reqMonth) : currentMonth
+    const targetYear = reqYear ? parseInt(reqYear) : currentYear
+
+    const monthStart = new Date(targetYear, targetMonth, 1)
     const monthStartStr = monthStart.toISOString().split('T')[0]
+
+    // Last day of the requested month
+    const monthEnd = new Date(targetYear, targetMonth + 1, 0)
+    const monthEndStr = monthEnd.toISOString().split('T')[0]
 
     const monthlyActivities = rawActivities.filter((a: any) => {
       const date = (a.start_date_local || a.start_date).split('T')[0]
-      return date >= monthStartStr
+      return date >= monthStartStr && date <= monthEndStr
     })
 
     const monthKm = Math.round(

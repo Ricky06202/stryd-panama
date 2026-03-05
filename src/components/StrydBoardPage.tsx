@@ -125,6 +125,8 @@ export function StrydBoardPage() {
   const [loginError, setLoginError] = useState<string | null>(null)
   const [profileTab, setProfileTab] = useState('estadisticas')
   const [showHistory, setShowHistory] = useState(false)
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
   const todayStr = useMemo(() => {
     return new Date().toLocaleDateString('es-PA', {
@@ -327,7 +329,7 @@ export function StrydBoardPage() {
     setIsLoadingMetrics(true)
     try {
       const response = await fetch(
-        `/api/strava/metrics?userId=${currentUserId}`,
+        `/api/strava/metrics?userId=${currentUserId}&month=${selectedMonth}&year=${selectedYear}`,
       )
       if (response.ok) {
         const data = (await response.json()) as any
@@ -471,7 +473,13 @@ export function StrydBoardPage() {
     if (view === 'performance' && currentUserId && profile.stravaConnected) {
       fetchMetrics()
     }
-  }, [view, currentUserId, profile.stravaConnected])
+  }, [
+    view,
+    currentUserId,
+    profile.stravaConnected,
+    selectedMonth,
+    selectedYear,
+  ])
 
   useEffect(() => {
     if (currentUserId) {
@@ -1355,12 +1363,62 @@ export function StrydBoardPage() {
 
             {/* New Statistics Grid */}
             <div className="mb-10">
-              <h2 className="text-xl font-black mb-6 flex items-center gap-3">
-                <span className="p-1.5 bg-blue-500/10 rounded-lg text-blue-500">
-                  <TrendingUp className="w-5 h-5" />
-                </span>
-                ESTADÍSTICAS ADICIONALES
-              </h2>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <h2 className="text-xl font-black flex items-center gap-3">
+                  <span className="p-1.5 bg-blue-500/10 rounded-lg text-blue-500">
+                    <TrendingUp className="w-5 h-5" />
+                  </span>
+                  ESTADÍSTICAS ADICIONALES
+                </h2>
+
+                {/* Month Selector */}
+                <div className="flex bg-gray-900 border border-gray-800 rounded-xl overflow-hidden focus-within:border-blue-500/50 transition-all">
+                  <select
+                    className="bg-transparent text-white px-4 py-2 outline-none cursor-pointer text-sm font-bold appearance-none"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  >
+                    {[
+                      'Enero',
+                      'Febrero',
+                      'Marzo',
+                      'Abril',
+                      'Mayo',
+                      'Junio',
+                      'Julio',
+                      'Agosto',
+                      'Septiembre',
+                      'Octubre',
+                      'Noviembre',
+                      'Diciembre',
+                    ].map((m, i) => (
+                      <option
+                        key={i}
+                        value={i}
+                        className="bg-gray-900 text-white"
+                      >
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="w-px bg-gray-800"></div>
+                  <select
+                    className="bg-transparent text-white px-4 py-2 outline-none cursor-pointer text-sm font-bold appearance-none"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  >
+                    {[2023, 2024, 2025, 2026].map((y) => (
+                      <option
+                        key={y}
+                        value={y}
+                        className="bg-gray-900 text-white"
+                      >
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
                 {[
                   {
