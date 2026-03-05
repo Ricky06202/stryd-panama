@@ -1256,6 +1256,34 @@ export function StrydBoardPage() {
             </form>
           </div>
         </div>
+
+        {/* Global Save Feedback Modal/Toast */}
+        {saveMessage && (
+          <div className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-auto sm:right-6 bg-gray-900 border border-gray-700 text-white p-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] z-100 flex items-center gap-3 animate-in slide-in-from-bottom-5">
+            <div
+              className={cn(
+                'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
+                saveMessage.toLowerCase().includes('error')
+                  ? 'bg-red-500/20 text-red-500'
+                  : 'bg-green-500/20 text-green-500',
+              )}
+            >
+              {saveMessage.toLowerCase().includes('error') ? (
+                <AlertCircle className="w-5 h-5" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5" />
+              )}
+            </div>
+            <p className="font-bold pr-2">{saveMessage}</p>
+            <button
+              onClick={() => setSaveMessage(null)}
+              className="text-gray-500 hover:text-white transition-colors ml-2"
+              type="button"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     )
   }
