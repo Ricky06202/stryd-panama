@@ -152,8 +152,7 @@ export function StrydBoardPage() {
         return
       }
 
-      // Populate profile with real data
-      setProfile({
+      const profileData = {
         fullName: data.fullName || '',
         idCard: data.idCard || '',
         email: data.email || '',
@@ -188,15 +187,52 @@ export function StrydBoardPage() {
         reviews: data.reviews || [],
         stravaConnected: !!data.stravaRefreshToken,
         coachMessages: [], // Will be fetched separately or populated if included in login data
-      })
+      }
+
+      // Populate profile with real data
+      setProfile(profileData)
 
       setCurrentUserId(data.id)
       setIsLoggedIn(true)
       setView('landing')
+
+      // Guardar sesión en localStorage
+      localStorage.setItem(
+        'strydboard_session',
+        JSON.stringify({
+          userId: data.id,
+          profile: profileData,
+        }),
+      )
     } catch (error) {
       setLoginError('Error de conexión')
     }
   }
+
+  const handleLogout = () => {
+    localStorage.removeItem('strydboard_session')
+    setIsLoggedIn(false)
+    setCurrentUserId(null)
+    setView('landing')
+  }
+
+  useEffect(() => {
+    // Restaurar sesión al cargar
+    const storedSession = localStorage.getItem('strydboard_session')
+    if (storedSession) {
+      try {
+        const session = JSON.parse(storedSession)
+        if (session && session.userId && session.profile) {
+          setCurrentUserId(session.userId)
+          setProfile(session.profile)
+          setIsLoggedIn(true)
+        }
+      } catch (e) {
+        console.error('Error parsing session data', e)
+        localStorage.removeItem('strydboard_session')
+      }
+    }
+  }, [])
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -618,12 +654,20 @@ export function StrydBoardPage() {
     return (
       <div className="min-h-screen bg-black text-white p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
-          <button
-            onClick={() => setView('landing')}
-            className="text-orange-500 hover:underline flex items-center gap-2 mb-8 font-bold"
-          >
-            ← Volver al inicio
-          </button>
+          <div className="flex justify-between items-center mb-8">
+            <button
+              onClick={() => setView('landing')}
+              className="text-orange-500 hover:underline flex items-center gap-2 font-bold"
+            >
+              ← Volver al inicio
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-red-400 hover:text-red-300 font-bold transition-colors"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
 
           {/* Premium App-Style Header */}
           <div className="mb-8">
@@ -1171,7 +1215,13 @@ export function StrydBoardPage() {
               {profile.fullName} • Análisis de entrenamiento
             </p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
+            <button
+              onClick={handleLogout}
+              className="text-red-400 hover:text-red-300 font-bold transition-colors"
+            >
+              Cerrar Sesión
+            </button>
             {profile.stravaConnected && (
               <Button
                 variant="outline"

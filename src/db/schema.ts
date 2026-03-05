@@ -86,7 +86,7 @@ export const users = sqliteTable('users', {
 export const ftpHistory = sqliteTable('ftp_history', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: integer('user_id')
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
   ftp: integer('ftp').notNull(),
   date: text('date').notNull(), // YYYY-MM-DD
@@ -98,7 +98,7 @@ export const ftpHistory = sqliteTable('ftp_history', {
 export const membershipRequests = sqliteTable('membership_requests', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: integer('user_id')
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
 
   // Objetivos
@@ -138,7 +138,7 @@ export const gallery = sqliteTable('gallery', {
 export const userReviews = sqliteTable('user_reviews', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: integer('user_id')
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
   content: text('content').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
@@ -149,7 +149,7 @@ export const userReviews = sqliteTable('user_reviews', {
 export const coachMessages = sqliteTable('coach_messages', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: integer('user_id')
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
   content: text('content').notNull(),
   isRead: integer('is_read', { mode: 'boolean' }).default(false),

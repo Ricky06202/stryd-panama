@@ -71,6 +71,13 @@
       "when": 1772583739527,
       "tag": "0009_same_talos",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1772669955151,
+      "tag": "0010_panoramic_green_goblin",
+      "breakpoints": true
     }
   ]
 }
