@@ -1465,54 +1465,6 @@ export function StrydBoardPage() {
                   </span>
                   ESTADÍSTICAS ADICIONALES
                 </h2>
-
-                {/* Month Selector */}
-                <div className="flex bg-gray-900 border border-gray-800 rounded-xl overflow-hidden focus-within:border-blue-500/50 transition-all">
-                  <select
-                    className="bg-transparent text-white px-4 py-2 outline-none cursor-pointer text-sm font-bold appearance-none"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                  >
-                    {[
-                      'Enero',
-                      'Febrero',
-                      'Marzo',
-                      'Abril',
-                      'Mayo',
-                      'Junio',
-                      'Julio',
-                      'Agosto',
-                      'Septiembre',
-                      'Octubre',
-                      'Noviembre',
-                      'Diciembre',
-                    ].map((m, i) => (
-                      <option
-                        key={i}
-                        value={i}
-                        className="bg-gray-900 text-white"
-                      >
-                        {m}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="w-px bg-gray-800"></div>
-                  <select
-                    className="bg-transparent text-white px-4 py-2 outline-none cursor-pointer text-sm font-bold appearance-none"
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  >
-                    {[2023, 2024, 2025, 2026].map((y) => (
-                      <option
-                        key={y}
-                        value={y}
-                        className="bg-gray-900 text-white"
-                      >
-                        {y}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
                 {[
@@ -2073,35 +2025,96 @@ export function StrydBoardPage() {
 
             {/* Monthly Comparison */}
             <div className="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden group mb-12">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-                <div className="flex items-center gap-3">
-                  <span className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                <div className="flex items-start gap-4">
+                  <span className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
                     <BarChart2 className="w-6 h-6" />
                   </span>
                   <div>
-                    <h3 className="text-xl font-black uppercase tracking-tight text-white m-0 leading-none">
+                    <h3 className="text-xl font-black uppercase tracking-tight text-white mb-2 leading-none flex items-center gap-2">
                       COMPARACIÓN MENSUAL
                     </h3>
-                    <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">
-                      DISTANCIA DIARIA (KM)
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl font-black text-white leading-none">
+                        {performanceStats.monthlyComparison.thisMonth
+                          .reduce((sum, val) => sum + (val || 0), 0)
+                          .toFixed(1)}
+                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-tight">
+                          KM EN
+                        </span>
+                        <span className="text-xs text-blue-400 font-extrabold uppercase tracking-wider leading-tight">
+                          EL MES
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex bg-gray-900 border border-gray-800 rounded-xl overflow-hidden focus-within:border-blue-500/50 transition-all shadow-inner">
-                  <div className="bg-gray-800/50 px-3 py-2 flex items-center justify-center border-r border-gray-800">
-                    <Calendar className="w-4 h-4 text-gray-400" />
+                <div className="flex flex-col md:items-end gap-3 mt-2 md:mt-0">
+                  {/* Filter Selector */}
+                  <div className="flex bg-gray-950 border border-gray-800 rounded-xl overflow-hidden focus-within:border-blue-500/50 transition-all shadow-inner h-10 w-fit">
+                    <div className="bg-gray-800/80 px-3 flex items-center justify-center border-r border-gray-800">
+                      <Calendar className="w-4 h-4 text-blue-400" />
+                    </div>
+                    <select
+                      className="bg-transparent text-white px-4 outline-none cursor-pointer text-xs font-bold appearance-none hover:bg-gray-800/30 transition-colors uppercase tracking-wider"
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                    >
+                      {[
+                        'Enero',
+                        'Febrero',
+                        'Marzo',
+                        'Abril',
+                        'Mayo',
+                        'Junio',
+                        'Julio',
+                        'Agosto',
+                        'Septiembre',
+                        'Octubre',
+                        'Noviembre',
+                        'Diciembre',
+                      ].map((m, i) => (
+                        <option
+                          key={i}
+                          value={i}
+                          className="bg-gray-900 text-white"
+                        >
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="w-px bg-gray-800"></div>
+                    <select
+                      className="bg-transparent text-white px-4 outline-none cursor-pointer text-xs font-bold appearance-none hover:bg-gray-800/30 transition-colors"
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(Number(e.target.value))}
+                    >
+                      {[2023, 2024, 2025, 2026].map((y) => (
+                        <option
+                          key={y}
+                          value={y}
+                          className="bg-gray-900 text-white"
+                        >
+                          {y}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="flex items-center px-4 py-2 gap-4">
+
+                  {/* Legend */}
+                  <div className="flex items-center gap-4 bg-gray-900/50 px-3 py-1.5 rounded-lg border border-gray-800/50">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-[#facc15] rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
-                      <span className="text-gray-400 text-sm font-bold">
+                      <div className="w-2.5 h-2.5 bg-[#facc15] rounded-full shadow-[0_0_8px_rgba(250,204,21,0.6)]"></div>
+                      <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider">
                         Mes anterior
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-[#4ade80] rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
-                      <span className="text-gray-400 text-sm font-bold">
+                      <div className="w-2.5 h-2.5 bg-[#4ade80] rounded-full shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
+                      <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider">
                         Este mes
                       </span>
                     </div>
