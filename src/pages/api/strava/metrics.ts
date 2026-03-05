@@ -194,6 +194,26 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const thisWeekDaily = getWeekData(currentMonday)
     const lastWeekDaily = getWeekData(lastMonday)
 
+    // Monthly comparison data (selected month vs previous month)
+    const getMonthData = (startOfMonth: Date) => {
+      const days = []
+      const year = startOfMonth.getFullYear()
+      const month = startOfMonth.getMonth()
+      const daysInMonth = new Date(year, month + 1, 0).getDate() // Get last day
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const d = new Date(year, month, i)
+        const dateStr = d.toISOString().split('T')[0]
+        days.push(Math.round((dailyDistances[dateStr] || 0) * 10) / 10)
+      }
+      return days
+    }
+
+    const lastMonthStart = new Date(targetYear, targetMonth - 1, 1)
+
+    const thisMonthDaily = getMonthData(monthStart)
+    const lastMonthDaily = getMonthData(lastMonthStart)
+
     // Calculate Ramp Rate (CTL today - CTL 7 days ago)
     // metrics contains DayStats[] for the last 90 days
     const currentCTL = metrics[metrics.length - 1]?.ctl || 0
@@ -242,6 +262,11 @@ export const GET: APIRoute = async ({ request, locals }) => {
           thisWeek: thisWeekDaily,
           lastWeek: lastWeekDaily,
           average: avgDailyDist,
+        },
+        // Monthly comparison
+        monthlyComparison: {
+          thisMonth: thisMonthDaily,
+          lastMonth: lastMonthDaily,
         },
         rampRate,
       }),

@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Map,
   MessageSquare,
+  BarChart2,
 } from 'lucide-react'
 import {
   BarChart,
@@ -117,6 +118,10 @@ export function StrydBoardPage() {
       thisWeek: [] as number[],
       lastWeek: [] as number[],
       average: 0,
+    },
+    monthlyComparison: {
+      thisMonth: [] as number[],
+      lastMonth: [] as number[],
     },
     rampRate: 0,
   })
@@ -350,6 +355,10 @@ export function StrydBoardPage() {
             thisWeek: [],
             lastWeek: [],
             average: 0,
+          },
+          monthlyComparison: data.monthlyComparison || {
+            thisMonth: [],
+            lastMonth: [],
           },
           rampRate: data.rampRate || 0,
         }))
@@ -1765,7 +1774,7 @@ export function StrydBoardPage() {
                 </div>
               </div>
 
-              <div className="h-[400px] w-full relative">
+              <div className="h-100 w-full relative">
                 {isLoadingMetrics ? (
                   <div className="h-full flex items-center justify-center">
                     <Loader2 className="w-12 h-12 text-green-500 animate-spin" />
@@ -1986,6 +1995,143 @@ export function StrydBoardPage() {
                 )}
               </div>
             </Card>
+
+            {/* Monthly Comparison */}
+            <div className="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden group mb-12">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+                <div className="flex items-center gap-3">
+                  <span className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
+                    <BarChart2 className="w-6 h-6" />
+                  </span>
+                  <div>
+                    <h3 className="text-xl font-black uppercase tracking-tight text-white m-0 leading-none">
+                      COMPARACIÓN MENSUAL
+                    </h3>
+                    <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">
+                      DISTANCIA DIARIA (KM)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex bg-gray-900 border border-gray-800 rounded-xl overflow-hidden focus-within:border-blue-500/50 transition-all shadow-inner">
+                  <div className="bg-gray-800/50 px-3 py-2 flex items-center justify-center border-r border-gray-800">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                  </div>
+                  <div className="flex items-center px-4 py-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-[#facc15] rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
+                      <span className="text-gray-400 text-sm font-bold">
+                        Mes anterior
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-[#4ade80] rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+                      <span className="text-gray-400 text-sm font-bold">
+                        Este mes
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-[400px] w-full relative mt-8">
+                {isLoadingMetrics ? (
+                  <div className="h-full flex items-center justify-center">
+                    <Loader2 className="w-12 h-12 text-green-500 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="h-full w-full overflow-x-auto thin-scrollbar">
+                    <div className="h-full min-w-200 md:min-w-full pb-4">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={Array.from({ length: 31 }).map((_, i) => ({
+                            day: String(i + 1),
+                            last:
+                              performanceStats.monthlyComparison.lastMonth[i] ||
+                              0,
+                            current:
+                              performanceStats.monthlyComparison.thisMonth[i] ||
+                              0,
+                          }))}
+                          margin={{ top: 40, right: 30, left: -20, bottom: 20 }}
+                          barGap={2}
+                        >
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="#1f2937"
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="day"
+                            stroke="#6b7280"
+                            fontSize={10}
+                            tickLine={false}
+                            axisLine={false}
+                            dy={10}
+                          />
+                          <YAxis
+                            stroke="#6b7280"
+                            fontSize={10}
+                            tickLine={false}
+                            axisLine={false}
+                          />
+                          <Tooltip
+                            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                return (
+                                  <div className="bg-gray-800 border border-gray-700 p-3 rounded-xl shadow-xl">
+                                    <p className="text-white font-bold text-xs mb-2">
+                                      Día {payload[0].payload.day}
+                                    </p>
+                                    {payload.map(
+                                      (entry: any, index: number) => (
+                                        <div
+                                          key={index}
+                                          className="flex items-center gap-2 mb-1"
+                                        >
+                                          <div
+                                            className="w-2 h-2 rounded-full"
+                                            style={{
+                                              backgroundColor: entry.color,
+                                            }}
+                                          ></div>
+                                          <span className="text-gray-400 text-[10px] uppercase font-bold">
+                                            {entry.name}:
+                                          </span>
+                                          <span className="text-white text-xs font-black">
+                                            {entry.value} km
+                                          </span>
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
+                                )
+                              }
+                              return null
+                            }}
+                          />
+                          <Bar
+                            dataKey="last"
+                            name="Mes anterior"
+                            fill="#facc15"
+                            radius={[4, 4, 0, 0]}
+                            barSize={12}
+                          />
+                          <Bar
+                            dataKey="current"
+                            name="Este mes"
+                            fill="#4ade80"
+                            radius={[4, 4, 0, 0]}
+                            barSize={12}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
             <Tabs defaultValue="power" className="space-y-8">
               <TabsList className="bg-gray-900 border border-gray-800 p-1.5 rounded-2xl w-full max-w-md">
