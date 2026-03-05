@@ -285,7 +285,24 @@ export function StrydBoardPage() {
 
       if (response.ok) {
         const data = (await response.json()) as { key: string }
-        setProfile((prev) => ({ ...prev, photoUrl: data.key }))
+        const newPhotoUrl = data.key
+
+        // Update local state and also automatically persist it to the database
+        setProfile((prev) => ({ ...prev, photoUrl: newPhotoUrl }))
+
+        // Auto-save the profile so the new photo appears immediately on the team page
+        await fetch('/api/profile/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: currentUserId,
+            ...profile,
+            photoUrl: newPhotoUrl, // Ensure we send the new photo URL explicitly
+          }),
+        })
+
+        setSaveMessage('Foto de perfil actualizada con éxito')
+        setTimeout(() => setSaveMessage(null), 3000)
       } else {
         setSaveMessage('Error al subir la imagen')
       }
