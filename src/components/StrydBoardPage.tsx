@@ -257,6 +257,15 @@ export function StrydBoardPage() {
       })
 
       if (response.ok) {
+        // Update the persisted session
+        localStorage.setItem(
+          'strydboard_session',
+          JSON.stringify({
+            userId: currentUserId,
+            profile: profile,
+          }),
+        )
+
         setSaveMessage('Perfil actualizado con éxito')
         setTimeout(() => setSaveMessage(null), 3000)
       } else {
@@ -288,7 +297,17 @@ export function StrydBoardPage() {
         const newPhotoUrl = data.key
 
         // Update local state and also automatically persist it to the database
-        setProfile((prev) => ({ ...prev, photoUrl: newPhotoUrl }))
+        const updatedProfile = { ...profile, photoUrl: newPhotoUrl }
+        setProfile(updatedProfile)
+
+        // Update the persisted session
+        localStorage.setItem(
+          'strydboard_session',
+          JSON.stringify({
+            userId: currentUserId,
+            profile: updatedProfile,
+          }),
+        )
 
         // Auto-save the profile so the new photo appears immediately on the team page
         await fetch('/api/profile/update', {
@@ -296,8 +315,7 @@ export function StrydBoardPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: currentUserId,
-            ...profile,
-            photoUrl: newPhotoUrl, // Ensure we send the new photo URL explicitly
+            ...updatedProfile, // Send the completely updated profile
           }),
         })
 
@@ -329,10 +347,22 @@ export function StrydBoardPage() {
 
       if (response.ok) {
         const data = (await response.json()) as { review: any }
-        setProfile((prev) => ({
-          ...prev,
-          reviews: [data.review, ...prev.reviews],
-        }))
+        const updatedProfile = {
+          ...profile,
+          reviews: [data.review, ...profile.reviews],
+        }
+
+        setProfile(updatedProfile)
+
+        // Update the persisted session
+        localStorage.setItem(
+          'strydboard_session',
+          JSON.stringify({
+            userId: currentUserId,
+            profile: updatedProfile,
+          }),
+        )
+
         setNewReview('')
         setSaveMessage('Reseña agregada con éxito')
         setTimeout(() => setSaveMessage(null), 3000)
