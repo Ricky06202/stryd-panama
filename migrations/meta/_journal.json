@@ -78,6 +78,13 @@
       "when": 1772669955151,
       "tag": "0010_panoramic_green_goblin",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1773005935633,
+      "tag": "0011_wise_black_bolt",
+      "breakpoints": true
     }
   ]
 }

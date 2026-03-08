@@ -51,6 +51,10 @@ const allPosts = await db
             >
             <th
               class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+              >Categoría</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
               >Fecha</th
             >
             <th
@@ -64,7 +68,7 @@ const allPosts = await db
             allPosts.length === 0 ? (
               <tr>
                 <td
-                  colspan="4"
+                  colspan="5"
                   class="px-6 py-10 text-center text-muted-foreground"
                 >
                   No hay posts todavía.
@@ -78,6 +82,9 @@ const allPosts = await db
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {post.slug}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
+                    {post.category || 'general'}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {post.createdAt
@@ -135,6 +142,23 @@ const allPosts = await db
             class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             required
           />
+        </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-card-foreground text-sm font-bold mb-2"
+            for="category">Categoría</label
+          >
+          <select
+            name="category"
+            id="category"
+            class="bg-input text-foreground shadow-sm border border-input rounded w-full py-2 px-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="general">General</option>
+            <option value="stryd">Stryd</option>
+            <option value="nutricion">Nutrición</option>
+            <option value="tecnica">Técnica</option>
+          </select>
         </div>
 
         <div class="mb-4">
@@ -225,6 +249,7 @@ const allPosts = await db
   const postIdInput = document.getElementById('postId') as HTMLInputElement
   const titleInput = document.getElementById('title') as HTMLInputElement
   const slugInput = document.getElementById('slug') as HTMLInputElement
+  const categoryInput = document.getElementById('category') as unknown as HTMLSelectElement
   const contentInput = document.getElementById('content') as HTMLTextAreaElement
   const linkInput = document.getElementById('link') as HTMLInputElement
   const imageInput = document.getElementById('image') as HTMLInputElement
@@ -325,6 +350,7 @@ const allPosts = await db
       titleInput.value = post.title
       slugInput.value = post.slug
       slugInput.dataset.auto = 'false'
+      categoryInput.value = post.category || 'general'
       contentInput.value = post.content
       linkInput.value = post.link || ''
       imageInput.value = post.image || ''
@@ -358,6 +384,7 @@ const allPosts = await db
     const data = {
       title: titleInput.value,
       slug: slugInput.value,
+      category: categoryInput.value,
       content: contentInput.value,
       image: imageInput.value,
       link: linkInput.value,

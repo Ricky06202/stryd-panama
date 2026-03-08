@@ -8,6 +8,7 @@ export const posts = sqliteTable('posts', {
   slug: text('slug').notNull().unique(),
   image: text('image'),
   link: text('link'),
+  category: text('category').default('general'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
     sql`(strftime('%s', 'now'))`,
   ),
