@@ -2,7 +2,10 @@
   "main": "dist/_worker.js/index.js",
   "name": "stryd-panama",
   "compatibility_date": "2025-11-18",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
@@ -11,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "strydpanama-db",
-      "database_id": "a37c47e0-c9cc-48ad-a485-9732a527fd07",
+      "database_id": "297fc88d-26da-47db-b0d9-abc6a829b33b",
       "remote": true,
     },
   ],
