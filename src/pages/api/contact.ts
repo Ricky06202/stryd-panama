@@ -1,5 +1,4 @@
 import type { APIRoute } from 'astro'
-import { notifyDiscord, execCtx } from '../../lib/discord'
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const RESEND_API_KEY = locals.runtime.env.RESEND_SECRET
@@ -63,15 +62,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
         { status: res.status, headers: { 'Content-Type': 'application/json' } },
       )
     }
-
-    // Aviso a Discord (best-effort): nunca altera la respuesta del formulario.
-    try {
-      const _p = String(nombre || '').trim().split(/\s+/).filter(Boolean)
-      const _nm = _p.length ? _p[0] + (_p[1] ? ' ' + _p[1].charAt(0) + '.' : '') : 'contacto'
-      notifyDiscord(locals.runtime.env, 'leads',
-        `\u{1F4DD} Nuevo contacto \u2014 strydpanama.com \u00b7 ${_nm}${titulo ? ' \u00b7 ' + String(titulo).slice(0, 60) : ''}`,
-        execCtx(locals))
-    } catch { /* best-effort */ }
 
     return new Response(
       JSON.stringify({
