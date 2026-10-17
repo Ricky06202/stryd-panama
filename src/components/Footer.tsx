@@ -73,14 +73,18 @@ export function Footer() {
             href="https://rsanjur.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center justify-center gap-2 text-xs text-gray-400 hover:text-orange-500 transition-colors"
+            className="mt-3 inline-flex items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.04] py-1.5 pl-1.5 pr-3 text-inherit transition-colors hover:border-white/25 hover:bg-white/[0.08]"
           >
-            <svg width="18" height="18" viewBox="0 0 512 512" aria-hidden="true" style={{ flex: 'none' }}>
-              <rect width="512" height="512" rx="112" fill="#0B1220" />
-              <text x="256" y="340" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontSize="252" fontWeight="800" letterSpacing="-8" fill="#FFFFFF">RS</text>
-              <rect x="196" y="380" width="120" height="26" rx="13" fill="#22D3EE" />
-            </svg>
-            <span>Sitio hecho por <b>rsanjur.com</b></span>
+            <span className="grid size-7 shrink-0 place-items-center rounded-md bg-[#0B1220]">
+              <svg width="18" height="18" viewBox="0 0 512 512" aria-hidden="true">
+                <text x="256" y="340" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontSize="252" fontWeight="800" letterSpacing="-8" fill="#FFFFFF">RS</text>
+                <rect x="196" y="380" width="120" height="26" rx="13" fill="#22D3EE" />
+              </svg>
+            </span>
+            <span className="text-left text-[11px] leading-[1.15] text-gray-400">
+              hecho por
+              <span className="block text-[12px] font-semibold tracking-tight text-gray-200">rsanjur.com</span>
+            </span>
           </a>
           <p className="mt-1 text-xs text-gray-500">
             ¿Quieres una página así? <a href="https://rsanjur.com/#contacto" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500">Escríbeme</a>
