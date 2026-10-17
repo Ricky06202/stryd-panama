@@ -69,6 +69,22 @@ export function Footer() {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
           <p>&copy; 2026 StrydPanama. Todos los derechos reservados.</p>
+          <a
+            href="https://rsanjur.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center justify-center gap-2 text-xs text-gray-400 hover:text-orange-500 transition-colors"
+          >
+            <svg width="18" height="18" viewBox="0 0 512 512" aria-hidden="true" style={{ flex: 'none' }}>
+              <rect width="512" height="512" rx="112" fill="#0B1220" />
+              <text x="256" y="340" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontSize="252" fontWeight="800" letterSpacing="-8" fill="#FFFFFF">RS</text>
+              <rect x="196" y="380" width="120" height="26" rx="13" fill="#22D3EE" />
+            </svg>
+            <span>Sitio hecho por <b>rsanjur.com</b></span>
+          </a>
+          <p className="mt-1 text-xs text-gray-500">
+            ¿Quieres una página así? <a href="https://rsanjur.com/#contacto" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500">Escríbeme</a>
+          </p>
         </div>
       </div>
     </footer>
